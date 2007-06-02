@@ -1,7 +1,7 @@
 The RyzCom Drain service is the heart of everything. It receives a
 stream of data from each client and stores this on file.
 
-A client is defined as a user (not mashine) and one file for each
+A client is defined as a user (not machine) and one file for each
 client is stored.
 
 Server is a simple console application with a log-in procedure.
@@ -31,4 +31,47 @@ If you build from Kdevelop you might get an error saying install.sh is missing.
 In that case, open a terminal and cd to the build directory and invoke:
 
 automake --add-missing
+
+
+To run the server:
+==================
+
+rsink [data_directory]
+
+Note that the argument is mandatory. It points out where the logfiles for all users are to be stored and is
+needed when the service is started from xinet superserver.
+
+
+Server from superserver (xinet):
+================================
+You need to be root to do the following.
+
+Create a file in /etc/xinet.d called rsink and copy&paste the following in it:
+
+# description: An xinetd internal service which echo's characters back to
+# clients.
+service rdrain
+{
+        port            = 13999
+        disable         = no
+#       type            = INTERNAL
+#       id              = echo-stream
+        socket_type     = stream
+#       protocol        = tcp
+        user            = ryzcom
+        wait            = no
+        server          = /usr/local/bin/rdrain
+        server_args     = /tmp/ryzcomdata
+}
+
+
+Edit the file /etc/services and add the line:
+
+rdrain          13999/tcp       nobody
+
+Restart your xinet:
+
+/etc/init.d/xinetd restart
+
+
 

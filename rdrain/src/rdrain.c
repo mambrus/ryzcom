@@ -9,7 +9,19 @@
 
 int main(int argc, char *argv[])
 {
-  printf("Hello, world!\n");
+	char username[80];
+	char rtap_vstr[80];
 
-  return EXIT_SUCCESS;
+	printf("rsink> Welcome to RyzCom sink service!\n");
+	fflush(stdout);
+	printf("rsink> Enter rtap version number: ");
+	fflush(stdout);
+	scanf("%s",&rtap_vstr);
+	printf("rsink> Enter username: ");
+	fflush(stdout);
+	scanf("%s",&username);
+	printf("rsink> User %s using rtap version %s is accepted.\n",username,rtap_vstr);
+	fflush(stdout);
+	
+	return EXIT_SUCCESS;
 }
