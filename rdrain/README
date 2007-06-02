@@ -42,7 +42,7 @@ Note that the argument is mandatory. It points out where the logfiles for all us
 needed when the service is started from xinet superserver.
 
 
-Server from superserver (xinet):
+Service from superserver (xinet):
 ================================
 You need to be root to do the following.
 

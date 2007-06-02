@@ -1,0 +1,16 @@
+# description: An xinetd internal service which echo's characters back to
+# clients.
+service rdrain
+{
+	port            = 13999
+	disable		= no
+#	type		= INTERNAL
+#	id		= echo-stream
+	socket_type	= stream
+	protocol	= tcp
+	user		= ryzcom
+	wait		= no
+	server		= /usr/local/bin/rdrain
+	server_args	= /tmp/ryzcomdata
+}                                                                               
+
