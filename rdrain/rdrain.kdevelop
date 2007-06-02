@@ -21,6 +21,7 @@
     <run>
       <mainprogram>src/rdrain</mainprogram>
       <terminal>true</terminal>
+      <directoryradio>executable</directoryradio>
     </run>
     <configurations>
       <optimized>
@@ -39,6 +40,12 @@
         <cflags>-O0 -g3 </cflags>
       </debug>
     </configurations>
+    <make>
+      <envvars>
+        <envvar value="1" name="WANT_AUTOCONF_2_5" />
+        <envvar value="1" name="WANT_AUTOMAKE_1_6" />
+      </envvars>
+    </make>
   </kdevautoproject>
   <kdevdoctreeview>
     <ignoretocs>
@@ -112,7 +119,7 @@
     <APPNAMESC>Rdrain</APPNAMESC>
     <APPNAMEUC>RDRAIN</APPNAMEUC>
     <AUTHOR>Michael Ambrus,,,</AUTHOR>
-    <CFLAGS></CFLAGS>
+    <CFLAGS/>
     <EMAIL>ambrmi09@kato</EMAIL>
     <LICENSE>Custom</LICENSE>
     <OPT_INCS>-I/usr/include</OPT_INCS>

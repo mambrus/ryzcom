@@ -8,3 +8,27 @@ Server is a simple console application with a log-in procedure.
 
 The log-in consists of answering which user is connecting and the
 version number of the client software (i.e. the rdrain).
+
+
+To build this project:
+======================
+
+* From clean check out
+
+aclocal
+autoheader
+automake --add-missing
+autoconf
+./configure
+make
+make install
+
+
+Important note:
+===============
+
+If you build from Kdevelop you might get an error saying install.sh is missing.
+In that case, open a terminal and cd to the build directory and invoke:
+
+automake --add-missing
+
