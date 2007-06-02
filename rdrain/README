@@ -1,0 +1,10 @@
+The RyzCom Drain service is the heart of everything. It receives a
+stream of data from each client and stores this on file.
+
+A client is defined as a user (not mashine) and one file for each
+client is stored.
+
+Server is a simple console application with a log-in procedure.
+
+The log-in consists of answering which user is connecting and the
+version number of the client software (i.e. the rdrain).
