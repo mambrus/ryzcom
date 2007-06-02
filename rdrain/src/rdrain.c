@@ -28,9 +28,24 @@
 #include <errno.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
+
 #ifndef PATH_MAX
 #include <sys/syslimits.h>
 #endif
+
+#ifndef LINE_MAX
+#define LINE_MAX 2048
+#endif
+
+char *ctime_curr(char *buff){
+	time_t time_data;	
+
+	time(&time_data);
+	strcpy(buff,ctime(&time_data));
+	buff[strlen(buff)-1]=0;
+	return buff;
+}
 
 int main(int argc, char *argv[])
 {
@@ -38,9 +53,10 @@ int main(int argc, char *argv[])
 	char rtap_vstr[NAME_MAX];
 	char data_dir[PATH_MAX];
 	char logfile_name[PATH_MAX];
-	FILE *logfile;
-	time_t time_data;
-	char time_str[NAME_MAX];	
+	FILE *logfile;	
+	char timebuff[NAME_MAX];
+	char inline_str[LINE_MAX];
+	//char outline_str[LINE_MAX];
 
 	if (argc != 2){
 		fprintf(stderr,"Wrong arguments to rdrain service\n");
@@ -51,7 +67,7 @@ int main(int argc, char *argv[])
 
 	printf("rsink> Welcome to RyzCom sink service!\n");
 	fflush(stdout);
-	printf("rsink> Enter rtap version number: ");
+	printf("rsink> Enter client ID and version number: ");
 	fflush(stdout);
 	scanf("%s",&rtap_vstr);
 	printf("rsink> Enter username: ");
@@ -69,11 +85,22 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	time(&time_data);
+	
 	fprintf(logfile,"rdain> ========================================================================\n");
-	fprintf(logfile,"rdain> %s",ctime(&time_data));
+	fprintf(logfile,"rdain> = -STARTED- client id: %s\n",rtap_vstr);
+	fprintf(logfile,"rdain> %s\n",ctime_curr(timebuff));
 	fprintf(logfile,"rdain> ========================================================================\n");
 	fflush(logfile);
+
+	while (!feof(stdin)){
+		scanf("%s",&inline_str);
+		fprintf(logfile,"%s@%s\n",ctime_curr(timebuff),inline_str);
+	}
+
+	fprintf(logfile,"rdain> ========================================================================\n");
+	fprintf(logfile,"rdain> = -STOPPED- client id: %s\n",rtap_vstr);
+	fprintf(logfile,"rdain> %s\n",ctime_curr(timebuff));
+	fprintf(logfile,"rdain> ========================================================================\n");
 
 
 	fclose(logfile);	

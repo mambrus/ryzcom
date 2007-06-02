@@ -61,7 +61,7 @@ service rdrain
         user            = ryzcom
         wait            = no
         server          = /usr/local/bin/rdrain
-        server_args     = /tmp/ryzcomdata
+        server_args     = /home/ryzcom/usersdata
 }
 
 
@@ -69,9 +69,16 @@ Edit the file /etc/services and add the line:
 
 rdrain          13999/tcp       nobody
 
+If you dont have a user called ryzcom allready, create one:
+
+adduser ryzcom
+
+
 Restart your xinet:
 
 /etc/init.d/xinetd restart
+
+
 
 
 

@@ -11,6 +11,6 @@ service rdrain
 	user		= ryzcom
 	wait		= no
 	server		= /usr/local/bin/rdrain
-	server_args	= /tmp/ryzcomdata
-}                                                                               
+	server_args	= /home/ryzcom/usersdata
+}
 

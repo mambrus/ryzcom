@@ -26,7 +26,7 @@
       <terminal>true</terminal>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs>/tmp/ryzcomdata</programargs>
+      <programargs>/home/ryzcom/usersdata</programargs>
       <autocompile>true</autocompile>
       <envvars/>
     </run>
@@ -56,7 +56,7 @@
       <runmultiplejobs>false</runmultiplejobs>
       <numberofjobs>1</numberofjobs>
       <dontact>false</dontact>
-      <makebin></makebin>
+      <makebin/>
       <prio>0</prio>
     </make>
   </kdevautoproject>
@@ -184,7 +184,7 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <programargs>/tmp/ryzcomdata</programargs>
+      <programargs>/home/ryzcom/usersdata</programargs>
       <gdbpath></gdbpath>
       <dbgshell>libtool</dbgshell>
       <configGdbScript></configGdbScript>
