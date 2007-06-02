@@ -1,0 +1,25 @@
+To build this project:
+======================
+
+* From clean check out
+
+aclocal
+autoheader
+automake --add-missing
+autoconf
+./configure
+make
+make install
+
+
+Important note:
+===============
+
+If you build from Kdevelop you might get an error saying install.sh is missing.
+In that case, open a terminal and cd to the build directory and invoke:
+
+automake --add-missing
+
+
+
+./src/rtap ../ 2>/dev/null

@@ -1,0 +1,4 @@
+RC_EXECUTE="wine ~/bin/Ryzom/client_ryzom_rd.exe"
+#RC_EXECUTE="cat ~/bin/Ryzom/client_backup.log | sed -e 's/.*:..:.. //'"
+RC_SERVER="kato.homelinux.org"
+RC_PORT="13999"
