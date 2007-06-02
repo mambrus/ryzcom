@@ -21,6 +21,7 @@
     <run>
       <mainprogram>src/ryzcom</mainprogram>
       <terminal>true</terminal>
+      <directoryradio>executable</directoryradio>
     </run>
     <configurations>
       <optimized>
@@ -39,6 +40,12 @@
         <cflags>-O0 -g3 </cflags>
       </debug>
     </configurations>
+    <make>
+      <envvars>
+        <envvar value="1" name="WANT_AUTOCONF_2_5" />
+        <envvar value="1" name="WANT_AUTOMAKE_1_6" />
+      </envvars>
+    </make>
   </kdevautoproject>
   <kdevdoctreeview>
     <ignoretocs>
@@ -98,7 +105,14 @@
     <groups>
       <group pattern="*.h" name="Header files" />
       <group pattern="*.c" name="Source files" />
+      <hidenonprojectfiles>false</hidenonprojectfiles>
+      <hidenonlocation>false</hidenonlocation>
     </groups>
+    <tree>
+      <showvcsfields>false</showvcsfields>
+      <hidenonprojectfiles>false</hidenonprojectfiles>
+      <hidepatterns>*.o,*.lo,CVS</hidepatterns>
+    </tree>
   </kdevfileview>
   <kdevdocumentation>
     <projectdoc>
@@ -112,7 +126,7 @@
     <APPNAMESC>Ryzcom</APPNAMESC>
     <APPNAMEUC>RYZCOM</APPNAMEUC>
     <AUTHOR>Aprak</AUTHOR>
-    <CFLAGS></CFLAGS>
+    <CFLAGS/>
     <EMAIL>ambrmi09@sourceforge.net</EMAIL>
     <LICENSE>Custom</LICENSE>
     <OPT_INCS>-I/usr/include</OPT_INCS>
@@ -121,4 +135,19 @@
     <YEAR>2007</YEAR>
     <dest>/home/ambrmi09/projects/ryzcom/ryzcom/server/ryzcom</dest>
   </substmap>
+  <kdevcppsupport>
+    <references/>
+    <codecompletion>
+      <includeGlobalFunctions>true</includeGlobalFunctions>
+      <includeTypes>true</includeTypes>
+      <includeEnums>true</includeEnums>
+      <includeTypedefs>false</includeTypedefs>
+      <automaticCodeCompletion>true</automaticCodeCompletion>
+      <automaticArgumentsHint>true</automaticArgumentsHint>
+      <automaticHeaderCompletion>true</automaticHeaderCompletion>
+      <codeCompletionDelay>250</codeCompletionDelay>
+      <argumentsHintDelay>400</argumentsHintDelay>
+      <headerCompletionDelay>250</headerCompletionDelay>
+    </codecompletion>
+  </kdevcppsupport>
 </kdevelop>
