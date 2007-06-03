@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
 	char *env_tapfile=NULL;
 	FILE *subproc_io;
 	char username[NAME_MAX];
+	int do_run;
 
 	username[0]=0;
 
@@ -157,8 +158,7 @@ int main(int argc, char *argv[])
 
 	do {
 		int early_break;
-		int ryz_socket;
-		int do_run;
+		int ryz_socket;		
 		int idle_cntr=0;
 
 		early_break = 0;
@@ -260,10 +260,10 @@ int main(int argc, char *argv[])
 		//Invalidate the username
 		username[0]=0;
 
-		if (!feof(subproc_io)){
+		if (!feof(subproc_io) && do_run){
 			printf(PACKAGE"> Re-iterate\n");
 		}
-	} while (!feof(subproc_io));
+	} while (!feof(subproc_io) && do_run);
 
 	pclose(subproc_io);
   	return EXIT_SUCCESS;
