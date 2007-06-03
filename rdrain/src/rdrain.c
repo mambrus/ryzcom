@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	//fprintf(stderr,"rsink data-path: %s\n",data_dir);
 
 	printf("rsink> Welcome to RyzCom sink service!\n");
-	fflush(stdout);
+	//fflush(stdout);
 	printf("rsink> Enter client ID and version number: ");
 	fflush(stdout);
 	scanf("%s",&rtap_vstr);
@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
 	fflush(logfile);
 
 	while (!feof(stdin)){
-		scanf("%s",&inline_str);
-		fprintf(logfile,"%s@%s\n",ctime_curr(timebuff),inline_str);
+		fgets(inline_str,LINE_MAX,stdin);
+		fprintf(logfile,"%s@%s",ctime_curr(timebuff),inline_str);
 	}
 
 	fprintf(logfile,"rdain> ========================================================================\n");

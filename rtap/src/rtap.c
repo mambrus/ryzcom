@@ -39,6 +39,8 @@
 #define LINE_MAX 2048
 #endif
 
+#include "network.h"
+
 /**
 Read a environment file into process environment
 */
@@ -138,8 +140,10 @@ int main(int argc, char *argv[])
 
 	do {
 		int early_break;
+		int ryz_socket;
 
 		early_break = 0;
+		ryz_socket =0;
 
 		while (!feof(subproc_io) && !username[0] ){
 			char *temp_name;
@@ -162,6 +166,7 @@ int main(int argc, char *argv[])
 		/**
 		Log in here
 		*/
+		ryz_socket=ryzcom_login(env_server,env_port,username);
 
 		//Simple filter of lines beginning with INF
 		while (!feof(subproc_io) && !early_break){
@@ -172,6 +177,7 @@ int main(int argc, char *argv[])
 			temp_str=strstr(inline_str,"INF");
 			if (temp_str){
 				printf(PACKAGE"> %s",inline_str);
+				ryzcom_sendline(ryz_socket,inline_str);
 			}
 	
 			temp_name=strstr(inline_str,"User request to reselect character");
@@ -184,6 +190,10 @@ int main(int argc, char *argv[])
 		/**
 		Log out here
 		*/
+		ryzcom_logout(ryz_socket);
+		
+		//Invalidate the username
+		username[0]=0;
 
 		if (!feof(subproc_io)){
 			printf(PACKAGE"> Re-iterate\n");
