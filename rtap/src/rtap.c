@@ -39,7 +39,7 @@
 #define LINE_MAX 2048
 #endif
 
-#define POLL_PERIOD 200000
+#define POLL_PERIOD 800000
 #define IDLE_MAX_1 45
 #define IDLE_MAX_2 240
 
@@ -168,46 +168,48 @@ int main(int argc, char *argv[])
 		printf(PACKAGE"> Username scan:\n");
 		while ((!feof(subproc_io) || env_tapfile) && !username[0] ){
 			char *temp_name;
-
-			printf(".");fflush(stdout);
+			char lastline_str[LINE_MAX];
+			
 			fgets(inline_str,LINE_MAX,subproc_io);
 			//fscanf(subproc_io,"%s",&inline_str);	
 			//printf(PACKAGE"> %s",inline_str);
-	
-			temp_name=strstr(inline_str,"user_login=");
-			if (temp_name){
-				temp_name=strchr(temp_name,'=');
-				temp_name++;
-				if (strchr(temp_name,'&')){
-					strchr(temp_name,'&')[0]=0;
-				};
-				strncpy(username,temp_name,NAME_MAX);
-			}
-			if (env_tapfile && feof(subproc_io)){
+			if ( strncmp(lastline_str,inline_str,LINE_MAX) ){
+				strncpy(lastline_str,inline_str,LINE_MAX);
+
+				temp_name=strstr(inline_str,"user_login=");
+				printf("+");fflush(stdout);
+				idle_cntr=0;
+				if (temp_name){
+					printf("\n");printf(PACKAGE"> ------------------ USERNAME DETECTED------------------!\n");
+					temp_name=strchr(temp_name,'=');
+					temp_name++;
+					if (strchr(temp_name,'&')){
+						strchr(temp_name,'&')[0]=0;
+					};
+					strncpy(username,temp_name,NAME_MAX);
+				}
+			}else{
 				usleep(POLL_PERIOD);
-				idle_cntr++;				
-				if (idle_cntr>=IDLE_MAX_1){
-					
+				printf("-");fflush(stdout);
+				idle_cntr++;
+			}
+			if (idle_cntr>=IDLE_MAX_1){
+				fclose(subproc_io);
+				printf("\n");printf(PACKAGE"> ------------------ REOPEN -----------------------!\n");
+				subproc_io=fopen(env_tapfile,"r");
+				idle_cntr=0;
+				/*
+				while (fseek(subproc_io,0,SEEK_END)!=0){
 					fclose(subproc_io);
 					printf("\n");
-					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
+					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
-					
-					printf("+");fflush(stdout);
 					idle_cntr=0;
-					/*
-					while (fseek(subproc_io,0,SEEK_END)!=0){
-						fclose(subproc_io);
-						printf("\n");
-						printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
-						subproc_io=fopen(env_tapfile,"r");
-						idle_cntr=0;
-						usleep(POLL_PERIOD);
-					}
-					*/
+					usleep(POLL_PERIOD);
 				}
-			}else
-				idle_cntr=0;
+				*/
+			}
+
 		}
 		printf("\n");
 		printf(PACKAGE"> User login: %s\n",username);
@@ -229,74 +231,49 @@ int main(int argc, char *argv[])
 
 			fgets(inline_str,LINE_MAX,subproc_io);
 			
-			
-
-			//if (!feof(subproc_io)){
-
 			if ( strncmp(lastline_str,inline_str,LINE_MAX) ){
 				strncpy(lastline_str,inline_str,LINE_MAX);
 				printf("#");fflush(stdout);
+				idle_cntr=0;
 
 				//Should be true only if we _pass_ EOF. I.e. there should be no risk of missing lines
 				temp_str=strstr(inline_str,"INF");
-				if (temp_str){
-					printf(PACKAGE"> %s",temp_str);
+				if (temp_str){					
+					printf("\n");printf(PACKAGE"> %s",temp_str);
 					ryzcom_sendline(ryz_socket,temp_str);
 				}
 						
 				temp_name=strstr(inline_str,"User request to reselect character");
 				if (strstr(inline_str,"Main loop releasing of Ryzom")){
-					printf(PACKAGE"> Quit detected!\n");
+					printf("\n");printf(PACKAGE"> Quit detected!\n");
 					do_run=0;
 					early_break = 1;
 				}
 				if (strstr(inline_str,"User request to reselect character")){
-					printf(PACKAGE"> User change detected!\n");
+					printf("\n");printf(PACKAGE"> User change detected!\n");
 					early_break = 1;
 				}
 			}else{
 				usleep(POLL_PERIOD);
 				printf(".");fflush(stdout);
-			}
-#ifndef APAN
-			if (env_tapfile && feof(subproc_io)){
-				usleep(POLL_PERIOD);
 				idle_cntr++;
-				if (idle_cntr>=IDLE_MAX_2){				
+			}
+			if (idle_cntr>=IDLE_MAX_2){
+				fclose(subproc_io);
+				printf("\n");printf(PACKAGE"> ------------------ REOPEN -----------------------!\n");
+				subproc_io=fopen(env_tapfile,"r");
+				idle_cntr=0;
+				/*
+				while (fseek(subproc_io,0,SEEK_END)!=0){
 					fclose(subproc_io);
 					printf("\n");
-					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
-					printf(PACKAGE"> WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
-					printf(PACKAGE"> WARNING! Truncation detected. Reopening tapfile:\n");
-					printf(PACKAGE"> MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
-					ryzcom_sendline(ryz_socket,"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
-					ryzcom_sendline(ryz_socket,"WARNING! Truncation detected. Reopening tapfile:\n");
-					ryzcom_sendline(ryz_socket,"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
-					
+					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
-					
-					printf("+");fflush(stdout);
 					idle_cntr=0;
-/*
-					while (fseek(subproc_io,0,SEEK_END)!=0){
-						fclose(subproc_io);
-						printf("\n");
-						printf(PACKAGE"> WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
-						printf(PACKAGE"> WARNING! Truncation detected. Reopening tapfile:\n");
-						printf(PACKAGE"> MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
-						subproc_io=fopen(env_tapfile,"r");
-						idle_cntr=0;
-						usleep(POLL_PERIOD);
-					}
-*/
+					usleep(POLL_PERIOD);
 				}
-			}else{
-				printf("#");fflush(stdout);
-				idle_cntr=0;
+				*/
 			}
-
-#endif
-				
 		}
 		printf(PACKAGE"> Logging out: %s\n",username);
 		/**
@@ -307,10 +284,10 @@ int main(int argc, char *argv[])
 		//Invalidate the username
 		username[0]=0;
 
-		if (!feof(subproc_io) && do_run){
+		if (do_run){
 			printf(PACKAGE"> Re-iterate\n");
 		}
-	} while (!feof(subproc_io) && do_run);
+	} while ((!feof(subproc_io) || env_tapfile) && do_run);
 
 	pclose(subproc_io);
   	return EXIT_SUCCESS;
