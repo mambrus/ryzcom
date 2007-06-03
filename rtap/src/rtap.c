@@ -185,13 +185,21 @@ int main(int argc, char *argv[])
 			}
 			if (env_tapfile && feof(subproc_io)){
 				usleep(POLL_PERIOD);
-				idle_cntr++;
+				idle_cntr++;				
 				if (idle_cntr>=IDLE_MAX_1){
 					fclose(subproc_io);
 					printf("\n");
 					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
 					idle_cntr=0;
+				}
+				while (fseek(subproc_io,0,SEEK_END)!=0){
+					fclose(subproc_io);
+					printf("\n");
+					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
+					subproc_io=fopen(env_tapfile,"r");
+					idle_cntr=0;
+					usleep(POLL_PERIOD);
 				}
 			}else
 				idle_cntr=0;
@@ -246,6 +254,14 @@ int main(int argc, char *argv[])
 					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
 					idle_cntr=0;
+				}
+				while (fseek(subproc_io,0,SEEK_END)!=0){
+					fclose(subproc_io);
+					printf("\n");
+					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
+					subproc_io=fopen(env_tapfile,"r");
+					idle_cntr=0;
+					usleep(POLL_PERIOD);
 				}
 			}else
 				idle_cntr=0;
