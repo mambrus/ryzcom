@@ -158,9 +158,11 @@ int main(int argc, char *argv[])
 	do {
 		int early_break;
 		int ryz_socket;
-		int idle_cntr=0;;
+		int do_run;
+		int idle_cntr=0;
 
 		early_break = 0;
+		do_run = 1;
 		ryz_socket =0;
 
 		printf(PACKAGE"> Username scan:\n");
@@ -200,9 +202,14 @@ int main(int argc, char *argv[])
 		Log in here
 		*/
 		ryz_socket=ryzcom_login(env_server,env_port,username);
+		if (ryz_socket<0){
+			printf(PACKAGE"> Can't connect with server: [%s@%s:%s]\n",username,env_server,env_port);
+			printf(PACKAGE"> Bailing out.. Sorry!: [%s@%s:%s]\n");
+			exit(1);
+		}
 
 		//Simple filter of lines beginning with INF
-		while ((!feof(subproc_io) || env_tapfile) && !early_break){
+		while ((!feof(subproc_io) || env_tapfile) && !early_break && do_run){
 			char *temp_str;
 			char *temp_name;
 			fgets(inline_str,LINE_MAX,subproc_io);
@@ -221,6 +228,7 @@ int main(int argc, char *argv[])
 				temp_name=strstr(inline_str,"User request to reselect character");
 				if (strstr(inline_str,"Main loop releasing of Ryzom")){
 					printf(PACKAGE"> Quit detected!\n");
+					do_run=0;
 					early_break = 1;
 				}
 				if (strstr(inline_str,"User request to reselect character")){
