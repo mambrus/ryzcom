@@ -40,8 +40,8 @@
 #endif
 
 #define POLL_PERIOD 1000000
-#define IDLE_MAX_1 10
-#define IDLE_MAX_2 120
+#define IDLE_MAX_1 45
+#define IDLE_MAX_2 240
 
 #include "network.h"
 
@@ -187,19 +187,24 @@ int main(int argc, char *argv[])
 				usleep(POLL_PERIOD);
 				idle_cntr++;				
 				if (idle_cntr>=IDLE_MAX_1){
+					
 					fclose(subproc_io);
 					printf("\n");
 					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
+					
+					printf("+");fflush(stdout);
 					idle_cntr=0;
-				}
-				while (fseek(subproc_io,0,SEEK_END)!=0){
-					fclose(subproc_io);
-					printf("\n");
-					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
-					subproc_io=fopen(env_tapfile,"r");
-					idle_cntr=0;
-					usleep(POLL_PERIOD);
+					/*
+					while (fseek(subproc_io,0,SEEK_END)!=0){
+						fclose(subproc_io);
+						printf("\n");
+						printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
+						subproc_io=fopen(env_tapfile,"r");
+						idle_cntr=0;
+						usleep(POLL_PERIOD);
+					}
+					*/
 				}
 			}else
 				idle_cntr=0;
@@ -249,19 +254,25 @@ int main(int argc, char *argv[])
 				usleep(POLL_PERIOD);
 				idle_cntr++;
 				if (idle_cntr>=IDLE_MAX_2){
+					/*
 					fclose(subproc_io);
 					printf("\n");
 					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
 					subproc_io=fopen(env_tapfile,"r");
+					*/
+					printf("+");fflush(stdout);
 					idle_cntr=0;
-				}
-				while (fseek(subproc_io,0,SEEK_END)!=0){
-					fclose(subproc_io);
-					printf("\n");
-					printf(PACKAGE"> Truncation detected. Reopening tapfile:\n");
-					subproc_io=fopen(env_tapfile,"r");
-					idle_cntr=0;
-					usleep(POLL_PERIOD);
+					while (fseek(subproc_io,0,SEEK_END)!=0){
+						fclose(subproc_io);
+						printf("\n");
+						printf(PACKAGE"> WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
+						printf(PACKAGE"> WARNING! Truncation detected. Reopening tapfile:\n");
+						printf(PACKAGE"> MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
+						subproc_io=fopen(env_tapfile,"r");
+						idle_cntr=0;
+						usleep(POLL_PERIOD);
+					}
+
 				}
 			}else
 				idle_cntr=0;
