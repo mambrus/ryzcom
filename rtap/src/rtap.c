@@ -39,7 +39,7 @@
 #define LINE_MAX 2048
 #endif
 
-#define POLL_PERIOD 1000000
+#define POLL_PERIOD 200000
 #define IDLE_MAX_1 45
 #define IDLE_MAX_2 240
 
@@ -225,12 +225,18 @@ int main(int argc, char *argv[])
 		while ((!feof(subproc_io) || env_tapfile) && !early_break && do_run){
 			char *temp_str;
 			char *temp_name;
+			char lastline_str[LINE_MAX];
+
 			fgets(inline_str,LINE_MAX,subproc_io);
-			printf(".");fflush(stdout);
+			
+			
 
-			//char lastline_str[LINE_MAX];
+			//if (!feof(subproc_io)){
 
-			if (!feof(subproc_io)){
+			if ( strncmp(lastline_str,inline_str,LINE_MAX) ){
+				strncpy(lastline_str,inline_str,LINE_MAX);
+				printf("#");fflush(stdout);
+
 				//Should be true only if we _pass_ EOF. I.e. there should be no risk of missing lines
 				temp_str=strstr(inline_str,"INF");
 				if (temp_str){
@@ -248,20 +254,30 @@ int main(int argc, char *argv[])
 					printf(PACKAGE"> User change detected!\n");
 					early_break = 1;
 				}
+			}else{
+				usleep(POLL_PERIOD);
+				printf(".");fflush(stdout);
 			}
-
+#ifndef APAN
 			if (env_tapfile && feof(subproc_io)){
 				usleep(POLL_PERIOD);
 				idle_cntr++;
-				if (idle_cntr>=IDLE_MAX_2){
-					/*
+				if (idle_cntr>=IDLE_MAX_2){				
 					fclose(subproc_io);
 					printf("\n");
 					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
+					printf(PACKAGE"> WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
+					printf(PACKAGE"> WARNING! Truncation detected. Reopening tapfile:\n");
+					printf(PACKAGE"> MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
+					ryzcom_sendline(ryz_socket,"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
+					ryzcom_sendline(ryz_socket,"WARNING! Truncation detected. Reopening tapfile:\n");
+					ryzcom_sendline(ryz_socket,"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
+					
 					subproc_io=fopen(env_tapfile,"r");
-					*/
+					
 					printf("+");fflush(stdout);
 					idle_cntr=0;
+/*
 					while (fseek(subproc_io,0,SEEK_END)!=0){
 						fclose(subproc_io);
 						printf("\n");
@@ -272,10 +288,14 @@ int main(int argc, char *argv[])
 						idle_cntr=0;
 						usleep(POLL_PERIOD);
 					}
-
+*/
 				}
-			}else
+			}else{
+				printf("#");fflush(stdout);
 				idle_cntr=0;
+			}
+
+#endif
 				
 		}
 		printf(PACKAGE"> Logging out: %s\n",username);
