@@ -39,6 +39,10 @@
 #define LINE_MAX 2048
 #endif
 
+#define POLL_PERIOD 1000000
+#define IDLE_MAX_1 10
+#define IDLE_MAX_2 120
+
 #include "network.h"
 
 /**
@@ -102,6 +106,7 @@ int main(int argc, char *argv[])
 	char *env_execute="wine ~/bin/Ryzom/client_ryzom_rd.exe";
 	char *env_server="kato.homelinux.org";
 	char *env_port="13999";
+	char *env_tapfile=NULL;
 	FILE *subproc_io;
 	char username[NAME_MAX];
 
@@ -127,13 +132,25 @@ int main(int argc, char *argv[])
 	env_execute=getenv("RC_EXECUTE");
 	env_server=getenv("RC_SERVER");
 	env_port=getenv("RC_PORT");
+	env_tapfile=getenv("RC_TAPFILE");
 
 	printf("%s@%s:%s\n",env_execute,env_server,env_port);
-	subproc_io=popen(env_execute,"r");
+
+	if (env_tapfile==NULL){
+		printf(PACKAGE"> Interacting...\n");
+		subproc_io=popen(env_execute,"r");		
+	}else{
+		char cmd[PATH_MAX];
+		printf(PACKAGE"> Taping via: %s\n",env_tapfile);
+		sprintf(cmd,"%s > /dev/null  2>&1 &",env_execute);
+		system(cmd);
+		subproc_io=fopen(env_tapfile,"r");
+	}
 	if (!subproc_io){
 		perror(strerror(errno));
 		exit(1);
 	}	
+
 	//Start searching for username
 	//It should look something like:
 	//INF    9 client_ryzom_rd.exe group_html.cpp 2243 : WEB: GET 'http://su1.rzl01.gameforge.fr:50000/mailbox.php?shard=103&user_login=Aprak&session_cookie='D659D954|80C1CED9|0003304F''
@@ -141,15 +158,19 @@ int main(int argc, char *argv[])
 	do {
 		int early_break;
 		int ryz_socket;
+		int idle_cntr=0;;
 
 		early_break = 0;
 		ryz_socket =0;
 
-		while (!feof(subproc_io) && !username[0] ){
+		printf(PACKAGE"> Username scan:\n");
+		while ((!feof(subproc_io) || env_tapfile) && !username[0] ){
 			char *temp_name;
 
+			printf(".");fflush(stdout);
 			fgets(inline_str,LINE_MAX,subproc_io);
-			//fscanf(subproc_io,"%s",&inline_str);
+			//fscanf(subproc_io,"%s",&inline_str);	
+			//printf(PACKAGE"> %s",inline_str);
 	
 			temp_name=strstr(inline_str,"user_login=");
 			if (temp_name){
@@ -160,8 +181,20 @@ int main(int argc, char *argv[])
 				};
 				strncpy(username,temp_name,NAME_MAX);
 			}
+			if (env_tapfile && feof(subproc_io)){
+				usleep(POLL_PERIOD);
+				idle_cntr++;
+				if (idle_cntr>=IDLE_MAX_1){
+					fclose(subproc_io);
+					printf("\n");
+					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
+					subproc_io=fopen(env_tapfile,"r");
+					idle_cntr=0;
+				}
+			}else
+				idle_cntr=0;
 		}
-	
+		printf("\n");
 		printf(PACKAGE"> User login: %s\n",username);
 		/**
 		Log in here
@@ -169,22 +202,46 @@ int main(int argc, char *argv[])
 		ryz_socket=ryzcom_login(env_server,env_port,username);
 
 		//Simple filter of lines beginning with INF
-		while (!feof(subproc_io) && !early_break){
+		while ((!feof(subproc_io) || env_tapfile) && !early_break){
 			char *temp_str;
 			char *temp_name;
 			fgets(inline_str,LINE_MAX,subproc_io);
-	
-			temp_str=strstr(inline_str,"INF");
-			if (temp_str){
-				printf(PACKAGE"> %s",inline_str);
-				ryzcom_sendline(ryz_socket,inline_str);
+			printf(".");fflush(stdout);
+
+			//char lastline_str[LINE_MAX];
+
+			if (!feof(subproc_io)){
+				//Should be true only if we _pass_ EOF. I.e. there should be no risk of missing lines
+				temp_str=strstr(inline_str,"INF");
+				if (temp_str){
+					printf(PACKAGE"> %s",temp_str);
+					ryzcom_sendline(ryz_socket,temp_str);
+				}
+						
+				temp_name=strstr(inline_str,"User request to reselect character");
+				if (strstr(inline_str,"Main loop releasing of Ryzom")){
+					printf(PACKAGE"> Quit detected!\n");
+					early_break = 1;
+				}
+				if (strstr(inline_str,"User request to reselect character")){
+					printf(PACKAGE"> User change detected!\n");
+					early_break = 1;
+				}
 			}
-	
-			temp_name=strstr(inline_str,"User request to reselect character");
-			if (temp_name){
-				printf(PACKAGE"> User change detected!\n");
-				early_break = 1;
-			}		
+
+			if (env_tapfile && feof(subproc_io)){
+				usleep(POLL_PERIOD);
+				idle_cntr++;
+				if (idle_cntr>=IDLE_MAX_2){
+					fclose(subproc_io);
+					printf("\n");
+					printf(PACKAGE"> Idletime exceeded. Reopening tapfile:\n");
+					subproc_io=fopen(env_tapfile,"r");
+					idle_cntr=0;
+				}
+			}else
+				idle_cntr=0;
+				
 		}
 		printf(PACKAGE"> Logging out: %s\n",username);
 		/**

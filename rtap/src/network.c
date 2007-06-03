@@ -31,6 +31,11 @@
 #include <string.h>
 #include <assert.h>
 
+#ifndef LINE_MAX
+#define LINE_MAX 2048
+#endif
+
+
 #include "network.h"
 
 /**
