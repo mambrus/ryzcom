@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
 
 	setenv("RC_DATA",data_dir,1);
 	setenv("RC_BIN",bin_dir,1);
+	printf("%s %s\n",data_dir,bin_dir);
+
 
 	while (!feof(stdin)){
 		printf(PACKAGE"> ");
@@ -95,7 +97,7 @@ int main(int argc, char *argv[])
 		rcon_exec(SUPER/*USER*/, inline_str, bin_dir);
 	}
 
-	printf("%s %s\n",data_dir,bin_dir);
+	
 
 	return EXIT_SUCCESS;
 }

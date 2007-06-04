@@ -52,9 +52,11 @@ int rcon_exec(int access, char *command, char *bin_dir){
 		setenv("PATH",tstr,1);
 		//printf("%s",getenv("PATH"));
 
+		rcon_logwrite("!","Executing in usermode: %s",command);
 		subproc_io=popen(command,"r");
 	}else{
 		sprintf(tstr,"%s/%s",bin_dir,command);
+		rcon_logwrite("!","Executing in usermode: %s",tstr);
 		subproc_io=popen(tstr,"r");
 	}
 
@@ -64,14 +66,17 @@ int rcon_exec(int access, char *command, char *bin_dir){
 		rcon_logwrite("<","Cmd error: %s",strerror(errno));
 		return (-1);
 	}
+
 	while (!feof(subproc_io)){
+		//printf("M\n");fflush(stdout);
+		/*TODO: Problem here with xinetd */
 		fgets(inline_str,LINE_MAX,subproc_io);
+		//printf("N\n");fflush(stdout);
 		if (!feof(subproc_io)){
 			printf("%s",inline_str);
 			rcon_logwrite("<","%s",inline_str);
 		}
 	}
-
 	pclose(subproc_io);
 	return(0);
 }
