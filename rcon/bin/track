@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This script will show a path of where the player has been last
+
+if test $# == 1; then
+	grep "&ZON&" $RC_DATA/$1 | \
+		tail -n 10 | \
+		sed -e 's/@.*You/: '$1'/' | \
+		sed -e 's/].*$//'	
+fi
+
+if test $# == 2; then
+	grep "&ZON&" $RC_DATA/$1 | \
+		tail -n $2 | \
+		sed -e 's/@.*You/: '$1'/' | \
+		sed -e 's/].*$//'	
+fi

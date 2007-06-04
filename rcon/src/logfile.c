@@ -17,8 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -31,6 +29,7 @@
 #include <limits.h>
 #include <time.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #ifndef PATH_MAX
 #include <sys/syslimits.h>
@@ -40,62 +39,52 @@
 #define LINE_MAX 2048
 #endif
 
-#define COMMAND_LOG "/tmp/rcon.log"
-
-#include "access.h"
 #include "logfile.h"
 
-int main(int argc, char *argv[])
-{
-	char *data_dir;
-	char *bin_dir;
-	char username[NAME_MAX];
-	char password[NAME_MAX];
-	FILE *logfile;
-	char inline_str[LINE_MAX];
-	
-	switch (argc) {
-		case 2:
-			//Data directory given
-			data_dir = argv[1];			
-			break;
-		case 3:
-			//Data & bin directory given
-			data_dir = argv[1];
-			bin_dir = argv[2];
-			break;
-		default:
-			fprintf(stderr,"Bad arguments to %s\n",PACKAGE);
-			exit(1);
-	};
 
-	printf(PACKAGE"> Welcome to RyzCom control service!\n");
-	fflush(stdout);
-	printf(PACKAGE"> Enter username: ");
-	fflush(stdout);
-	scanf("%s",&username);
-	printf(PACKAGE"> Enter password: ");
-	fflush(stdout);
-	scanf("%s",&password);
+FILE *logfile;
+char username[NAME_MAX];
 
-	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n",username);
-	fflush(stdout);
-	fgets(inline_str,LINE_MAX,stdin); //Get rid of some fishyness (dunno why it's needed)
+char *ctime_curr(char *buff){
+	time_t time_data;	
 
-	rcon_logopen(COMMAND_LOG,username);
+	time(&time_data);
+	strcpy(buff,ctime(&time_data));
+	buff[strlen(buff)-1]=0;
+	return buff;
+}
 
-	setenv("RC_DATA",data_dir,1);
-	setenv("RC_BIN",bin_dir,1);
 
-	while (!feof(stdin)){
-		printf(PACKAGE"> ");
-		fflush(stdout);
-		fgets(inline_str,LINE_MAX,stdin);
-		rcon_logwrite(">","%s",inline_str);
-		rcon_exec(SUPER/*USER*/, inline_str, bin_dir);
+int rcon_logopen(const char *filename, const char *_username){
+	strncpy(username,_username,NAME_MAX);
+	logfile=fopen(filename,"a");
+	if (!logfile){
+		perror(strerror(errno));
+		exit(1);
 	}
+	return 0;
+}
 
-	printf("%s %s\n",data_dir,bin_dir);
+int rcon_logclose(){
+	fclose(logfile);
+	return 0;
+}
 
-	return EXIT_SUCCESS;
+int rcon_logwrite(const char *prefix, const char *format, ...){
+	va_list ap;		
+		char timebuff[NAME_MAX];
+		char buff1[LINE_MAX];
+		char buff2[LINE_MAX];
+		int rc;
+	va_start (ap, format);
+		/*Copy to locals*/
+	//va_end(ap);			//Don't end AP here - we're piping the variable to sprintf function for final parsing
+	
+	rc=vsprintf(buff1,format,ap);
+	va_end(ap);
+
+	fseek(logfile,SEEK_END,0);
+	fprintf(logfile,"%s %s%s %s",ctime_curr(timebuff),username,prefix,buff1);
+	fflush(logfile);
+	return 0;
 }

@@ -5,4 +5,4 @@
 #
 # I.e. using this script from rcon will list available commands
 
-grep Aprak $RC_DATA/$1 
+ls $RC_BIN

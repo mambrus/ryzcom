@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -40,62 +39,40 @@
 #define LINE_MAX 2048
 #endif
 
-#define COMMAND_LOG "/tmp/rcon.log"
-
 #include "access.h"
 #include "logfile.h"
 
-int main(int argc, char *argv[])
-{
-	char *data_dir;
-	char *bin_dir;
-	char username[NAME_MAX];
-	char password[NAME_MAX];
-	FILE *logfile;
+int rcon_exec(int access, char *command, char *bin_dir){
+	char tstr[LINE_MAX];
 	char inline_str[LINE_MAX];
-	
-	switch (argc) {
-		case 2:
-			//Data directory given
-			data_dir = argv[1];			
-			break;
-		case 3:
-			//Data & bin directory given
-			data_dir = argv[1];
-			bin_dir = argv[2];
-			break;
-		default:
-			fprintf(stderr,"Bad arguments to %s\n",PACKAGE);
-			exit(1);
-	};
+	FILE *subproc_io;
 
-	printf(PACKAGE"> Welcome to RyzCom control service!\n");
-	fflush(stdout);
-	printf(PACKAGE"> Enter username: ");
-	fflush(stdout);
-	scanf("%s",&username);
-	printf(PACKAGE"> Enter password: ");
-	fflush(stdout);
-	scanf("%s",&password);
+	if (access & SUPER){
+		sprintf(tstr,"%s:%s",bin_dir,getenv("PATH"));
+		setenv("PATH",tstr,1);
+		//printf("%s",getenv("PATH"));
 
-	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n",username);
-	fflush(stdout);
-	fgets(inline_str,LINE_MAX,stdin); //Get rid of some fishyness (dunno why it's needed)
-
-	rcon_logopen(COMMAND_LOG,username);
-
-	setenv("RC_DATA",data_dir,1);
-	setenv("RC_BIN",bin_dir,1);
-
-	while (!feof(stdin)){
-		printf(PACKAGE"> ");
-		fflush(stdout);
-		fgets(inline_str,LINE_MAX,stdin);
-		rcon_logwrite(">","%s",inline_str);
-		rcon_exec(SUPER/*USER*/, inline_str, bin_dir);
+		subproc_io=popen(command,"r");
+	}else{
+		sprintf(tstr,"%s/%s",bin_dir,command);
+		subproc_io=popen(tstr,"r");
 	}
 
-	printf("%s %s\n",data_dir,bin_dir);
 
-	return EXIT_SUCCESS;
+	if (subproc_io == NULL){
+		perror(PACKAGE"> ");			
+		rcon_logwrite("<","Cmd error: %s",strerror(errno));
+		return (-1);
+	}
+	while (!feof(subproc_io)){
+		fgets(inline_str,LINE_MAX,subproc_io);
+		if (!feof(subproc_io)){
+			printf("%s",inline_str);
+			rcon_logwrite("<","%s",inline_str);
+		}
+	}
+
+	pclose(subproc_io);
+	return(0);
 }
+
