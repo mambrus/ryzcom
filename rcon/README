@@ -1,0 +1,86 @@
+The RyzCom Control service is a server-side application that provides a
+front-end of commands to a remote network user. A typical user would be
+a guild leader wishing to coordinate his guild based on the groups stats 
+and whereabouts, or an advanced player wishing to track his own progress.
+
+All commands are simple scripts following a certain set of rules and one
+theoretically let users have an account and telnet in. However, having 
+hundreds of users being able to access a server is a security issue.
+
+This module does the same thing, except that only programs in a particular
+subdirectory are possible to run and the log-in procedure is simpler.
+
+One could also acheave the same thing by creating a shell gaul, and let
+a normal command shell do the job.
+
+To build this project:
+======================
+
+* From clean check out
+
+aclocal
+autoheader
+automake --add-missing
+autoconf
+./configure
+make
+make install
+
+
+Important note:
+===============
+
+If you build from Kdevelop you might get an error saying install.sh is missing.
+In that case, open a terminal and cd to the build directory and invoke:
+
+automake --add-missing
+
+
+To run the server:
+==================
+
+rcon [data_directory] [<bin_directory>]
+
+Note that the first argument is mandatory. It points out where the logfiles 
+for all users are to be stored and is needed when the service is started from 
+xinet superserver. 
+
+The second argument is optional. If omitted the program will assume the path to
+be: ./bin
+
+
+Service from superserver (xinet):
+================================
+You need to be root to do the following.
+
+Create a file in /etc/xinet.d called rcon and copy&paste the following in it:
+
+# description: An xinetd internal service which echo's characters back to
+# clients.
+service rcon
+{
+        port            = 13998
+        disable         = no
+#       type            = INTERNAL
+#       id              = echo-stream
+        socket_type     = stream
+#       protocol        = tcp
+        user            = ryzcom
+        wait            = no
+        server          = /usr/local/bin/rcon
+        server_args     = /home/ryzcom/usersdata /home/ryzcom/bin
+}
+
+
+Edit the file /etc/services and add the line:
+
+rcon          13998/tcp       nobody
+
+If you dont have a user called ryzcom allready, create one:
+
+adduser ryzcom
+
+
+Restart your xinet:
+
+/etc/init.d/xinetd restart

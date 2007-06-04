@@ -26,9 +26,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <errno.h>
+#include <string.h>
+#include <limits.h>
+#include <time.h>
+#include <assert.h>
+
+#ifndef PATH_MAX
+#include <sys/syslimits.h>
+#endif
+
+#ifndef LINE_MAX
+#define LINE_MAX 2048
+#endif
+
 int main(int argc, char *argv[])
 {
-  printf("Hello, world!\n");
+	char *data_dir;
+	char *bin_dir;
+	char username[NAME_MAX];
+	char password[NAME_MAX];
 
-  return EXIT_SUCCESS;
+	switch (argc) {
+		case 2:
+			//Data directory given
+			data_dir = argv[1];			
+			break;
+		case 3:
+			//Data & bin directory given
+			data_dir = argv[1];
+			bin_dir = argv[2];
+			break;
+		default:
+			fprintf(stderr,"Bad arguments to %s\n",PACKAGE);
+			exit(1);
+	};
+
+	printf(PACKAGE"> Welcome to RyzCom control service!\n");
+	fflush(stdout);
+	printf(PACKAGE"> Enter username: ");
+	fflush(stdout);
+	scanf("%s",&username);
+	printf(PACKAGE"> Enter password: ");
+	fflush(stdout);
+	scanf("%s",&password);
+
+	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n",username);
+	fflush(stdout);
+
+	printf("%s %s\n",data_dir,bin_dir);
+
+	return EXIT_SUCCESS;
 }
