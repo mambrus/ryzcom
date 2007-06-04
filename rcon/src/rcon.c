@@ -40,30 +40,40 @@
 #define LINE_MAX 2048
 #endif
 
-#define COMMAND_LOG "/tmp/rcon.log"
-
 #include "access.h"
 #include "logfile.h"
 
+#define HOME "/home/ryzcom"
+#define COMMAND_LOG "/home/ryzcom/rcon.log"
+
 int main(int argc, char *argv[])
 {
-	char *data_dir;
-	char *bin_dir;
+	char *etc_dir=HOME"/etc";
+	char *data_dir=HOME"/usersdata";
+	char *bin_dir=HOME"/bin_rcon";
 	char username[NAME_MAX];
 	char password[NAME_MAX];
 	FILE *logfile;
 	char inline_str[LINE_MAX];
+	int access = 0;
 	
 	switch (argc) {
 		case 2:
-			//Data directory given
-			data_dir = argv[1];			
+			//etc directory given
+			etc_dir = argv[1];
 			break;
 		case 3:
-			//Data & bin directory given
-			data_dir = argv[1];
-			bin_dir = argv[2];
+			//etc & data directory given
+			etc_dir = argv[1];
+			data_dir = argv[2];
 			break;
+		case 4:
+			//etc & data & bin directory given
+			etc_dir = argv[1];
+			data_dir = argv[2];
+			bin_dir = argv[3];
+			break;
+
 		default:
 			fprintf(stderr,"Bad arguments to %s\n",PACKAGE);
 			exit(1);
@@ -71,22 +81,40 @@ int main(int argc, char *argv[])
 
 	printf(PACKAGE"> Welcome to RyzCom control service!\n");
 	fflush(stdout);
-	printf(PACKAGE"> Enter username: ");
-	fflush(stdout);
-	scanf("%s",&username);
-	printf(PACKAGE"> Enter password: ");
-	fflush(stdout);
-	scanf("%s",&password);
+	
+
+	sprintf(inline_str,"%s/passwd.rcon",etc_dir);
+	do {
+		printf(PACKAGE"> Enter username: ");
+		fflush(stdout);
+		scanf("%s",&username);
+
+		rcon_logopen(COMMAND_LOG,username);
+		printf(PACKAGE"> Enter password: ");
+		fflush(stdout);
+		scanf("%s",&password);
+		access=get_acces(inline_str, username, password);
+		if (!(access>0)){
+			printf(PACKAGE"> Acces denied!\n");
+			fflush(stdout);
+			rcon_logwrite("!","Acces denied!\n");
+			rcon_logclose();
+		}
+		if (feof(stdin)){
+			rcon_logwrite("!","EOF detected");
+			rcon_logclose();
+			return EXIT_SUCCESS;
+		}
+	}while (!(access>0));
 
 	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n",username);
 	fflush(stdout);
+	rcon_logwrite(">","Acces granted!\n");
 	fgets(inline_str,LINE_MAX,stdin); //Get rid of some fishyness (dunno why it's needed)
-
-	rcon_logopen(COMMAND_LOG,username);
 
 	setenv("RC_DATA",data_dir,1);
 	setenv("RC_BIN",bin_dir,1);
-	printf("%s %s\n",data_dir,bin_dir);
+	//printf("%s %s\n",data_dir,bin_dir);
 
 
 	while (!feof(stdin)){
@@ -94,9 +122,10 @@ int main(int argc, char *argv[])
 		fflush(stdout);
 		fgets(inline_str,LINE_MAX,stdin);
 		rcon_logwrite(">","%s",inline_str);
-		rcon_exec(SUPER/*USER*/, inline_str, bin_dir);
+		rcon_exec(access, inline_str, bin_dir);
 	}
-
+	rcon_logwrite("!","EOF detected");
+	rcon_logclose();
 	
 
 	return EXIT_SUCCESS;

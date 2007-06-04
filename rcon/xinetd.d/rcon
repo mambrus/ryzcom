@@ -11,5 +11,5 @@ service rcon
 	user		= ryzcom
 	wait		= no
 	server		= /usr/local/bin/rcon
-	server_args	= /home/ryzcom/usersdata /home/ryzcom/bin
+	server_args	= /home/ryzcom/usersdata /home/ryzcom/bin_rcon
 }

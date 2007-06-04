@@ -28,5 +28,14 @@ This module handles log-in authorization and access control
 #define LEADER	(1<<2)
 #define SUPER	(1<<3)
 
+/**
+Returns access pattern based on if user is found in list and is password is 
+correct.
+
+A negative value is returned to indicating a error.
+*/
+
+int get_acces(char *filename, char *user,char *password);
+
 #endif
 

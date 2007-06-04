@@ -19,9 +19,24 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 #***************************************************************************/
 export MYFIFO=/tmp/rcon_$$.pipe
-mkfifo $MYFIFO
-./tcpservlet.exp port=$1  <$MYFIFO | \
-	rcon /home/ryzcom/usersdata /home/ryzcom/rcon_bin > \
-	$MYFIFO 2>&1
 
+
+if test $# == 0; then
+	PORT=13997
+fi
+
+if test $# == 1; then
+	PORT=$1
+fi
+
+mkfifo $MYFIFO
+RC=999
+
+while test $RC != 130; do
+	./tcpservlet.exp port=$PORT  <$MYFIFO | \
+		rcon /home/ryzcom/etc /home/ryzcom/usersdata /home/ryzcom/bin_rcon > \
+		$MYFIFO 2>&1
+	RC=$?
+	echo "Done! The return value is $RC"
+done
 rm $MYFIFO

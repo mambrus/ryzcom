@@ -1,0 +1,12 @@
+# Password file for rcon
+# This file is supposed to be empty in repository
+# Users are listed as follows
+# [username]:[password]:[access code]
+
+# "Acces code" is a bitfield based on or-ing the following values:
+
+# GUEST		= 1
+# USER		= 2
+# LEADER	= 4
+# SUPER		= 8
+

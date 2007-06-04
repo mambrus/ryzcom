@@ -63,7 +63,7 @@ trap {
 	puts $logfile "--> tcpservlet: SIGINT trapped"
 	flush $logfile
 	close $logfile
-	exit 0
+	exit 14
 } SIGINT
 
 
@@ -135,9 +135,16 @@ proc Server {channel clientaddr clientport} {
 			return
 			}
 		\u00ff\u00f4\u00ff\u00fd\u0006 {
-			puts $logfile "tcpservlet: Ctrl-C from client received"; flush $logfile
-			close
-			return
+			puts $logfile "tcpservlet: Ctrl-C from client received WM"; flush $logfile			
+			#The following isnt working. Close should SIGINT the spawned proc
+			#close
+			#send_user -raw "\u00ff\u00f4\u00ff\u00fd\u0006"
+			#exec kill -9 spawn_id
+			send_user -raw eof
+			send_user -raw "\u00ff\u00f4\u00ff\u00fd\u0006"
+			close			
+			#return
+			exit 0
 			}
 		-re "(.*)\r\n" {
 			send_user -raw $interact_out(1,string)\n

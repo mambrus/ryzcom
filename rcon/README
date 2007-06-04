@@ -68,7 +68,7 @@ service rcon
         user            = ryzcom
         wait            = no
         server          = /usr/local/bin/rcon
-        server_args     = /home/ryzcom/usersdata /home/ryzcom/bin
+        server_args     = /home/ryzcom/etc /home/ryzcom/usersdata /home/ryzcom/bin_rcon
 }
 
 
@@ -84,3 +84,10 @@ adduser ryzcom
 Restart your xinet:
 
 /etc/init.d/xinetd restart
+
+
+Alternative via TCP servlet
+===========================
+Run the script rcon_start.sh to invoke a server via the tcpservlet wrapper
+
+Note that in this case only one user at a time can be served.
