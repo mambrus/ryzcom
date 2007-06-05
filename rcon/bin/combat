@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# This script will show either users last combat (one argument) or the n'th 
+# from last (two arguments)
+
+
+COMBAT_PATTERN='&SYS&\|&SPLM&\|&DGM&\|&DG&\|&MIS&\|&CHK&\|&XP&'
+
+LISTAFTER_AWK='
+BEGIN{
+	found=0;
+	 gsub(" ","[[:space:]]+",pattern)
+}{
+	if (found==1){
+		print
+	}else{
+		if (match($0,pattern)!=0)
+			found=1;
+	}
+}
+'
+
+LISTUNTIL_AWK='
+BEGIN{
+	found=0;
+	 gsub(" ","[[:space:]]+",pattern)
+}{
+	if (found==1){
+	}else{
+		print
+		if (match($0,pattern)!=0)
+			found=1;
+	}
+}
+'
+
+
+if test $# == 1; then
+mob_target=$(grep "&SYS&" $RC_DATA/$1 | \
+	grep "You target a" | \
+	tail -n 1 | \
+	sed -e 's/@.*You target an\?/: /' | \
+	sed -e 's/].*$//')
+fi
+
+if test $# == 2; then
+mob_target=$(grep "&SYS&" $RC_DATA/$1 | \
+	grep "You target a" | \
+	tail -n $2 | \
+	head -n 1 | \
+	sed -e 's/@.*You target an\?/: /' | \
+	sed -e 's/].*$//')
+fi
+
+
+echo "Mob: $mob_target"
+
+timestamp=$(echo $mob_target | \
+	sed -e 's/\(.*:\)\(.*\)/\1/' | sed -e 's/:$//')
+
+#echo $timestamp
+
+
+
+echo "Combat progress:"
+
+grep $COMBAT_PATTERN $RC_DATA/$1 | \
+	awk -v pattern="^$timestamp.*" "$LISTAFTER_AWK" | \
+	awk -v pattern="kill|leave|You target" "$LISTUNTIL_AWK" | \
+	sed -e 's/^.*&/ /' | \
+	sed -e 's/].*$//' | \
+	sed -e "s/You/$1/"
+
+echo "XP:"
+
+grep $COMBAT_PATTERN $RC_DATA/$1 | \
+	awk -v pattern="^$timestamp.*" "$LISTAFTER_AWK" | \
+	awk -v pattern="&XP&|&CHK&|You target" "$LISTUNTIL_AWK" | \
+	sed -e 's/@.*&/ /' | \
+	sed -e 's/].*$//' | \
+	sed -e "s/You/$1/" | \
+	grep "exp" | \
+	tail -n1
+
+
+
