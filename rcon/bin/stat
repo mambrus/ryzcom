@@ -1,8 +1,30 @@
 #!/bin/bash
 
-# This script will list all the files in the directory pointed out by the 
-# RC_BIN env variable.
-#
-# I.e. using this script from rcon will list available commands
+# This script will list the stats of a player
 
-grep Aprak $RC_DATA/$1 
+
+function this_dir {
+   export this_cmd="$0"
+   bash -c "cd $(dirname $this_cmd); pwd"
+}
+
+function print_xp {
+	grep "&XP&" $RC_DATA/$1 | grep "improves" | \
+		sed -e 's/@.*XP&/: /' | \
+		sed -e 's/]$//'
+}
+
+#print_xp $1 | sed -e 's/\(.*Your\)\(.*skill\)\(.*\))/\2/'
+
+skills=$(print_xp $1 | sed -e 's/\(.*Your\)\(.*skill\)\(.*\)/\2/' | sed -e 's/skill//' | sed -e "s/'//g" | sort -u)
+
+for skill in $skills;do
+	#print_xp $1 | grep $skill | tail -n1 | sed -e "s/Your/$1's/"
+	print_xp $1 | grep $skill | tail -n1 | sed -e "s/.*Your//"  | sed -e "s/ improves to/:/"
+done
+
+
+#for lvl in  $lvls;do
+#	echo $lvl
+#done
+	

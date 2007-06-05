@@ -1,13 +1,41 @@
 #!/bin/bash
 
-# This script will list all the files in the directory pointed out by the 
-# RC_BIN env variable.
-#
-# I.e. using this script from rcon will list available commands
+# This script will determine where a player is
+
+LISTAFTER_AWK='
+BEGIN{
+	found=0;
+	 gsub(" ","[[:space:]]+",pattern)
+}{
+	if (found==1){
+		print
+	}else{
+#		if (match($0,"Sun Jun 3 21:11:51 2007")!=0)
+#		if (match($0,"Sun[[:space:]]+Jun[[:space:]]+3")!=0)
+		if (match($0,pattern)!=0)
+			found=1;
+	}
+}
+'
+echo "Region:"
+
+region=$(grep "&ZON&" $RC_DATA/$1 | \
+	grep "You are in the" | \
+	tail -n 1 | \
+	sed -e 's/@.*You are in the/: /' | \
+	sed -e 's/].*$//')
+echo $region
+
+timestamp=$(echo $region | \
+	sed -e 's/\(.*:\)\(.*\)/\1/' | sed -e 's/:$//')
+
+#echo $timestamp
+
+echo "Sites:"
 
 grep "&ZON&" $RC_DATA/$1 | \
-	grep "You have entered" | \
-	tail -n 1 | \
-	sed -e 's/@.*You have entered/: /' | \
-	sed -e 's/].*$//'
+	awk -v pattern="^$timestamp.*" "$LISTAFTER_AWK" | \
+	awk -v pattern="are in the" "$LISTAFTER_AWK" | \
+	sed -e "s/@.*You/: $1/" | \
+        sed -e 's/].*$//'
 
