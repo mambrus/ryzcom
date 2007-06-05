@@ -39,9 +39,9 @@
 #define LINE_MAX 2048
 #endif
 
-#define POLL_PERIOD 800000
-#define IDLE_MAX_1 45
-#define IDLE_MAX_2 240
+#define POLL_PERIOD 200000
+#define IDLE_MAX_1 45000
+#define IDLE_MAX_2 1024
 
 #include "network.h"
 
@@ -169,8 +169,12 @@ int main(int argc, char *argv[])
 		while ((!feof(subproc_io) || env_tapfile) && !username[0] ){
 			char *temp_name;
 			char lastline_str[LINE_MAX];
+         char *rc;
 			
-			fgets(inline_str,LINE_MAX,subproc_io);
+			rc=fgets(inline_str,LINE_MAX,subproc_io);
+         if (rc==NULL){
+            printf("$");fflush(stdout);
+         }
 			//fscanf(subproc_io,"%s",&inline_str);	
 			//printf(PACKAGE"> %s",inline_str);
 			if ( strncmp(lastline_str,inline_str,LINE_MAX) ){
