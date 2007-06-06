@@ -42,24 +42,52 @@
 #include "access.h"
 #include "logfile.h"
 
+/**
+@brief Executes a [command] in the hosts shell.
+
+Executes a [command] in the hosts shell.
+
+If [access] contains the SUPER flag, it will allow full access as run by the 
+owner of the superprocess (i.e. ryzcom if run by xinetd), in which case 
+[bin_dir] is added to the PATH.
+
+If [access] is missing the SUPER flag, command will be prepended with 
+[bin_dir] which is supposed to disable a user from doing malicious operations
+on the server.
+*/
 int rcon_exec(int access, char *command, char *bin_dir){
 	char tstr[LINE_MAX];
 	char inline_str[LINE_MAX];
 	FILE *subproc_io;
 
+	// Clean out the string. If run from internet tex-based protocols it 
+	// access might contain CRLF. (Perhaps shanning for other control 
+	// characters would also be advisable).
+	if (strchr(command,'\r'))
+		(strchr(command,'\r'))[0]=0;
+	if (strchr(command,'\n'))
+		(strchr(command,'\n'))[0]=0;
+
+	// 'exit' is the only built-in command. It's usefull in cases where 
+	// SIGINT can't be trapped (i.e. when run from xinetd, the client
+	// will tot generate a SIGINT when pressing <ctrl>-c.
+	if (strstr(command,"exit") != NULL){
+		rcon_logwrite("!","cmd: exit");
+		rcon_logclose();
+		exit(0);
+	}
+		
 	if (access & SUPER){
 		sprintf(tstr,"%s:%s",bin_dir,getenv("PATH"));
 		setenv("PATH",tstr,1);
-		//printf("%s",getenv("PATH"));
 
-		rcon_logwrite("!","Executing in usermode: %s",command);
+		rcon_logwrite("!","Executing in supermode: %s",command);
 		subproc_io=popen(command,"r");
 	}else{
 		sprintf(tstr,"%s/%s",bin_dir,command);
 		rcon_logwrite("!","Executing in usermode: %s",tstr);
 		subproc_io=popen(tstr,"r");
 	}
-
 
 	if (subproc_io == NULL){
 		perror(PACKAGE"> ");			
@@ -68,10 +96,7 @@ int rcon_exec(int access, char *command, char *bin_dir){
 	}
 
 	while (!feof(subproc_io)){
-		//printf("M\n");fflush(stdout);
-		/*TODO: Problem here with xinetd */
 		fgets(inline_str,LINE_MAX,subproc_io);
-		//printf("N\n");fflush(stdout);
 		if (!feof(subproc_io)){
 			printf("%s",inline_str);
 			rcon_logwrite("<","%s",inline_str);

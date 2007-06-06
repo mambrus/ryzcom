@@ -116,7 +116,6 @@ int main(int argc, char *argv[])
 	setenv("RC_BIN",bin_dir,1);
 	//printf("%s %s\n",data_dir,bin_dir);
 
-
 	while (!feof(stdin)){
 		printf(PACKAGE"> ");
 		fflush(stdout);
