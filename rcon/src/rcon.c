@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 			exit(1);
 	};
 
-	printf(PACKAGE"> Welcome to RyzCom control service!\n");
+	printf(PACKAGE"> Welcome to RyzCom control service!\n\r");
 	fflush(stdout);
 	
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 		scanf("%s",&password);
 		access=get_acces(inline_str, username, password);
 		if (!(access>0)){
-			printf(PACKAGE"> Acces denied!\n");
+			printf(PACKAGE"> Acces denied!\n\r");
 			fflush(stdout);
 			rcon_logwrite("!","Acces denied!\n");
 			rcon_logclose();
@@ -107,14 +107,14 @@ int main(int argc, char *argv[])
 		}
 	}while (!(access>0));
 
-	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n",username);
+	printf(PACKAGE"> User %s is accepted. Welcome to RyzCom control!\n\r",username);
 	fflush(stdout);
 	rcon_logwrite(">","Acces granted!\n");
 	fgets(inline_str,LINE_MAX,stdin); //Get rid of some fishyness (dunno why it's needed)
 
 	setenv("RC_DATA",data_dir,1);
 	setenv("RC_BIN",bin_dir,1);
-	//printf("%s %s\n",data_dir,bin_dir);
+	//printf("%s %s\n\r",data_dir,bin_dir);
 
 	while (!feof(stdin)){
 		printf(PACKAGE"> ");

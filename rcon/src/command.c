@@ -81,11 +81,11 @@ int rcon_exec(int access, char *command, char *bin_dir){
 		sprintf(tstr,"%s:%s",bin_dir,getenv("PATH"));
 		setenv("PATH",tstr,1);
 
-		rcon_logwrite("!","Executing in supermode: %s",command);
+		rcon_logwrite("!","Executing in supermode: %s\n",command);
 		subproc_io=popen(command,"r");
 	}else{
 		sprintf(tstr,"%s/%s",bin_dir,command);
-		rcon_logwrite("!","Executing in usermode: %s",tstr);
+		rcon_logwrite("!","Executing in usermode: %s\n",tstr);
 		subproc_io=popen(tstr,"r");
 	}
 
@@ -98,7 +98,7 @@ int rcon_exec(int access, char *command, char *bin_dir){
 	while (!feof(subproc_io)){
 		fgets(inline_str,LINE_MAX,subproc_io);
 		if (!feof(subproc_io)){
-			printf("%s",inline_str);
+			printf("%s\r",inline_str);
 			rcon_logwrite("<","%s",inline_str);
 		}
 	}
