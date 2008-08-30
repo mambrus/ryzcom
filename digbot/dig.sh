@@ -1,5 +1,9 @@
 #!/bin/bash
 . ./.env $1
+. ./bot_primitives.sh $1
+
+# This file contains the logic to performe one complete dig
+# including prospecting  
 
 E_MATS='\[&ITM&You found .* raw material sources.\]'
 E_DONEDIG='INF.*\[&XP&'
@@ -8,105 +12,6 @@ E_BROKENPICK='INF.*\[&CHK&You don.* forage'
 E_DMG='INF.*\[&DMG&'
 E_DEAD='INF.*\[&SYS&You have been killed'
 E_ITEMTOBAG='INF.*\[&ITM&You obtain'
-
-
-function XteSleep {
-	echo "sleep $1" | xte
-}
-
-function XteUSleep {
-	echo "usleep $1" | xte
-}
-
-function Paus {
-	XteUSleep 200000
-}
-function uPaus {
-	XteUSleep 50000
-}
-
-function FocusClientWindow {
-	echo "mousemove 100 100" | xte
-	echo "mouseclick 1" | xte
-	Paus
-}
-
-function UpDown_key {
-	xte "key $RKEY_UPDOWN"
-	Paus
-}
-
-function Prospect_key {
-	xte "key $RKEY3"
-	Paus
-}
-
-function ProspectFar_key {
-	xte "key $RKEY10"
-	Paus
-}
-
-function Extract {
-	xte "key $RKEY1"
-	Paus
-}
-
-function Careplan {
-	xte "key $RKEY2"
-	Paus
-}
-
-function RunForward {
-	xte "keydown $RKEY_FORWARD"
-	XteSleep $1
-	xte "keyup $RKEY_FORWARD"
-}
-
-function PrintChar {
-	echo "key $1" | xte
-#	echo "key $1" 
-	uPaus
-}
-
-function PrintSpace {
-	echo 'str ' | xte
-	uPaus
-}
-
-function PrintStr {
-	theStr=`echo $1 | sed -e 's/./& /g'`
-	for aChar in $theStr; do
-		PrintChar $aChar;
-	done	
-}
-
-function PrintLine {
-	for aWord in $1; do
-#		PrintStr $aWord;
-		echo $aWord;
-	done	
-}
-
-function xPrintLine {
-	echo "key Return" | xte
-	Paus
-	for aWord in $1; do
-		PrintStr $aWord;
-		PrintSpace;
-#		echo $aWord;
-	done	
-	echo "key Return" | xte
-	Paus
-}
-
-function ccTargetMats {
-	PrintLine 'str /tar Raw Material Source [Aprak]'
-}
-
-function TargetMats {
-	xte  "key $RKEY_MATS"
-	Paus
-}
 
 function OneCycle {
 	#SyncEvents
