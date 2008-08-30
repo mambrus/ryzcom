@@ -1,0 +1,30 @@
+#!/bin/bash
+# *** Internal calibration 
+#     (This depends of your char's skills, please tune)
+
+# ** Dig related
+# * This value determines how many CP's per dig to have. 
+# * A value of two should be OK
+export CYCLE_N=2
+
+# * The following two define the dig/cp ration, but also how long your dig takes.
+# * A good ratio should be about 4:1 and you should have time to complete CYCLE_N
+# * If sum of the times is related to "Extraction Time Bonus" stanza among others.
+export CYCLE_DIG_TIME=22
+export CYCLE_CP_TIME=6
+
+# ** Prospect related
+# * How long to wait before mats appear after start of prospect.
+# * This depends of your prospect "Speed" stanza. Setting this 
+# * value rather high will not hurt nor make your digging slower. 
+# * Too low value however might lead to missing found mats (especially 
+# * mats far away).
+export PROSPECT_INITIAL_TIME=9
+
+# * How long to rest after each prospect. This setting will help regain a 
+# * little before each digg so that your focus will not empty out.
+# * Choose this value carefully. To high value will make filling the bag 
+# * slower, but to small value will lead to focus starvation leading to degraded 
+# * mats and in worst case even blow-up's 
+export PROSPECT_REST_TIME=7
+
