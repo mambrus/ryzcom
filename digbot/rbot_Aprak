@@ -26,5 +26,5 @@ export PROSPECT_INITIAL_TIME=9
 # * Choose this value carefully. To high value will make filling the bag 
 # * slower, but to small value will lead to focus starvation leading to degraded 
 # * mats and in worst case even blow-up's 
-export PROSPECT_REST_TIME=7
+export PROSPECT_REST_TIME=10
 

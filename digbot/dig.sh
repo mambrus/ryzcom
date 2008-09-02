@@ -8,66 +8,11 @@
 E_MATS='\[&ITM&You found .* raw material sources.\]'
 E_DONEDIG='INF.*\[&XP&'
 E_BADDIG='INF.*\[&CHK&You need a target'
+E_NOFOCUS='INF.*\[&CHKCB&Not enough focus' 
 E_BROKENPICK='INF.*\[&CHK&You don.* forage'
 E_DMG='INF.*\[&DMG&'
 E_DEAD='INF.*\[&SYS&You have been killed'
 E_ITEMTOBAG='INF.*\[&ITM&You obtain'
-
-function OneCycle {
-	#SyncEvents
-	Extract
-	SleepEvent $CYCLE_DIG_TIME "$1"
-	Careplan
-	SleepEvent $CYCLE_CP_TIME "$1"
-}
-
-function DigCycles {
-	for (( loop=0 ; loop<$1 ; loop++ )) ; do
-		echo "  Cycle $loop"
-		OneCycle "$2";
-		DefaultEventHndl
-	done
-}
-
-function PickUp {
-	echo "mousemove 125 300" | xte
-	Paus
-	echo "mouseclick 1" | xte
-	Paus
-	echo "mouseclick 1" | xte
-	Paus
-}
-
-function EvadeToxicCloud {
-	RunForward 4
-}
-
-
-function Dig {
-	echo "Dig"
-	SyncEvents
-	TargetMats
-	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
-	#DefaultEventHndl
-	echo "  Cycle last"
-	Extract
-	if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"; then
-	#if SleepEvent 40 "/$E_DONEDIG/"; then
-		echo "Sleep aborted due to event";
-	else
-		echo "-- Timeout --";
-	fi;
-	Paus
-	echo "  Pickup"
-	PickUp
-	if SleepEvent 10 "$E_ITEMTOBAG"; then
-		echo "X Mats picked up";
-		cat $GREPDUMP | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
-	else
-		echo "@@@@@@@@@@@@@@@ Pickup Timeout -> Bag must be full @@@@@@";
-		exit $RC_BAGFULL;
-	fi;
-}
 
 
 function SyncEvents {
@@ -137,6 +82,34 @@ function DefaultEventHndl {
 			fi;
 }
 
+function OneCycle {
+	#SyncEvents
+	Extract
+	SleepEvent $CYCLE_DIG_TIME "$1"
+	Careplan
+	SleepEvent $CYCLE_CP_TIME "$1"
+}
+
+function DigCycles {
+	for (( loop=0 ; loop<$1 ; loop++ )) ; do
+		echo "  Cycle $loop"
+		OneCycle "$2";
+		DefaultEventHndl
+	done
+}
+
+function PickUp {
+	echo "mousemove 125 300" | xte
+	Paus
+	echo "mouseclick 1" | xte
+	Paus
+	echo "mouseclick 1" | xte
+	Paus
+}
+
+function EvadeToxicCloud {
+	RunForward 4
+}
 
 function Prospect {
 	for (( ppf=0 , ppi=0 ; ppf==0 ; ppi++ )) do
@@ -191,6 +164,46 @@ function Prospect {
 			Paus
 		fi;
 	done
+}
+
+function Dig {
+	echo "Dig"
+	SyncEvents
+	TargetMats
+	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
+	#DefaultEventHndl
+	echo "  Cycle last"
+	for (( keep_digging=1 , retries=0 ; (keep_digging==1) && (retries<5) ; retries++ )) do
+		#&& retries<5
+		Extract
+		if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD|$E_NOFOCUS"; then
+			if EventOccured "$E_NOFOCUS"; then
+				SyncEvents
+				echo "------> Low on focus <---------";				
+				let "keep_digging=1";
+				UpDown_key;
+				XteSleep 3;
+				UpDown_key;
+			else
+				let "keep_digging=0";
+			fi;
+			
+			echo "Sleep aborted due to event";
+		else
+			echo "-- Timeout --";
+			let "keep_digging=0";
+		fi;
+	done;
+	Paus
+	echo "  Pickup"
+	PickUp
+	if SleepEvent 10 "$E_ITEMTOBAG"; then
+		echo "X Mats picked up";
+		cat $GREPDUMP | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
+	else
+		echo "@@@@@@@@@@@@@@@ Pickup Timeout -> Bag must be full @@@@@@";
+		exit $RC_BAGFULL;
+	fi;
 }
 
 function PrintTuningSettings {
