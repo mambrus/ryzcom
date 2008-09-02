@@ -171,7 +171,7 @@ function Dig {
 	SyncEvents
 	TargetMats
 	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
-	#DefaultEventHndl
+	DefaultEventHndl
 	echo "  Cycle last"
 	for (( keep_digging=1 , retries=0 ; (keep_digging==1) && (retries<5) ; retries++ )) do
 		#&& retries<5
@@ -182,7 +182,7 @@ function Dig {
 				echo "------> Low on focus <---------";				
 				let "keep_digging=1";
 				UpDown_key;
-				XteSleep 3;
+				SleepEvent 3 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
 				UpDown_key;
 			else
 				let "keep_digging=0";
