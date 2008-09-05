@@ -37,22 +37,37 @@ function UpDown_key {
 }
 
 function Prospect_key {
-	xte "key $RKEY3"
+	xte "key $RKEY_PROSPECT"
 	Paus
 }
 
 function ProspectFar_key {
-	xte "key $RKEY10"
+	xte "key $RKEY_PROSPECT_FAR"
 	Paus
 }
 
 function Extract {
-	xte "key $RKEY1"
+	xte "key $RKEY_EXTRACT_1"
+	Paus
+}
+
+function ExtractLow {
+	xte "key $RKEY_EXTRACT_2"
 	Paus
 }
 
 function Careplan {
-	xte "key $RKEY2"
+	xte "key $RKEY_CP"
+	Paus
+}
+
+function SelfHealFocus {
+	xte "key $RKEY_SH_FOCUS"
+	Paus
+}
+
+function SelfHealHp {
+	xte "key $RKEY_SH_HP"
 	Paus
 }
 
