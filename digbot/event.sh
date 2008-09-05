@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./.env $1
+. ./.env
 
 # ** This file contains the logic to handle the event system
   
