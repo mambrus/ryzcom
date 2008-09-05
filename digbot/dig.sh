@@ -1,9 +1,32 @@
 #!/bin/bash
-. ./.env $1
-. ./bot_primitives.sh $1
-
 # This file contains the logic to performe one complete dig
 # including prospecting  
+
+THIS_SCRIPT="dig.sh"
+THIS_SHELL=`echo ${0/#.*\//}` 
+
+. ./bot_primitives.sh
+# *** Internal calibration 
+if [ $THIS_SCRIPT == $THIS_SHELL ]; then
+	if [ -z $TOON_NAME ]; then
+		TOON_NAME="DEFAULT"
+	else
+		echo "Digging as [$TOON_NAME]" 
+	fi;
+else
+	TOON_NAME=$2
+fi;
+
+. ./.env
+if [ $THIS_SCRIPT == $THIS_SHELL ]; then
+	TOON_NAME="DEFAULT"
+else
+	TOON_NAME=$2
+fi;
+. ./.env
+
+# *** Internal calibration 
+. rbot_$TOON_NAME
 
 E_MATS='\[&ITM&You found .* raw material sources.\]'
 E_DONEDIG='INF.*\[&XP&'
@@ -98,15 +121,6 @@ function DigCycles {
 	done
 }
 
-function PickUp {
-	echo "mousemove 125 300" | xte
-	Paus
-	echo "mouseclick 1" | xte
-	Paus
-	echo "mouseclick 1" | xte
-	Paus
-}
-
 function EvadeToxicCloud {
 	RunForward 4
 }
@@ -157,11 +171,7 @@ function Prospect {
 			fi;
 			UpDown_key
 
-			xte "keydown $RKEY_TURNLEFT"
-			Paus
-			XteUSleep 350000
-			xte "keyup $RKEY_TURNLEFT"
-			Paus
+			Turn left 45;
 		fi;
 	done
 }
@@ -216,17 +226,27 @@ function PrintTuningSettings {
 	echo "*************************************"
 }
 
-PrintTuningSettings
-SyncEvents
-FocusClientWindow
+function CompleteCycle {
+	PrintTuningSettings
+	SyncEvents
+	FocusClientWindow
 
-Prospect
-DefaultEventHndl
-Dig
-DefaultEventHndl
-Dig
-DefaultEventHndl
+	Prospect
+	DefaultEventHndl
+	Dig
+	DefaultEventHndl
+	Dig
+	DefaultEventHndl
+}
 
-exit 0;
+if [ $THIS_SCRIPT == $THIS_SHELL ]; then
+	echo "Performing $THIS_SCRIPT command:"
+	echo "$@"
+	FocusClientWindow
+	"$@"
+else
+	CompleteCycle
+	exit 0;
+fi;
 
 

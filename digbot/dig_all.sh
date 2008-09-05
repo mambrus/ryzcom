@@ -1,21 +1,19 @@
 #!/bin/bash
 
-if [ $# == 1 ]; then
-	. ./.env ""
-elif [ $# == 2 ]; then
-	. ./.env $2
-elif [ $# == 3 ]; then
+if [ $# == 3 ]; then
 	if [ $3 != "daring" ]; then
 		exit 1;
 	fi; 
-	. ./.env $2
 else
 	echo "Syntax error: dig_all.sh (<Dig count>|<0=clean internal inventory counter>) [<TG Toon name>] ["daring"]"
 fi;
 
-	export DISPLAY=:0.0	
-	echo "" > $DLOGFILE;
+TOON_NAME=$2
+. ./.env
 
+# *** Internal calibration 
+. rbot_$TOON_NAME
+echo "" > $DLOGFILE;
 
 function NotifyMaster {
 	case $1 in

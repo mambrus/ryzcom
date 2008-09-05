@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./.env $2
+. ./.env
 . ./dig_all.sh $1 $2 $3 $4 | tee $DBOTFILE
 
 if [ $1 == 0 ]; then
