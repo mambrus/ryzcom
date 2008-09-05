@@ -2,26 +2,20 @@
 # This file contains the logic to performe one complete dig
 # including prospecting  
 
-THIS_SCRIPT="dig.sh"
-THIS_SHELL=`echo ${0/#.*\//}` 
-
 . ./bot_primitives.sh
+
+THIS_SCRIPT="dig.sh"
+THIS_SHELL=`echo ${0/#.*\//}`
+
 # *** Internal calibration 
 if [ $THIS_SCRIPT == $THIS_SHELL ]; then
 	if [ -z $TOON_NAME ]; then
-		TOON_NAME="DEFAULT"
+		export TOON_NAME="DEFAULT"
 	else
-		echo "Digging as [$TOON_NAME]" 
+		echo "Digging as [$TOON_NAME]"
 	fi;
 else
-	TOON_NAME=$2
-fi;
-
-. ./.env
-if [ $THIS_SCRIPT == $THIS_SHELL ]; then
-	TOON_NAME="DEFAULT"
-else
-	TOON_NAME=$2
+	export TOON_NAME=$2
 fi;
 . ./.env
 
@@ -30,6 +24,7 @@ fi;
 
 # *** Create an event-system for this shell 
 . ./event.sh
+
 
 function OneCycle {
 	#SyncEvents
@@ -97,12 +92,12 @@ function Prospect {
 			fi;
 			UpDown_key
 
-			Turn left 45;
+			Turn left 90;
 		fi;
 	done
 }
 
-function Dig {
+function ExtractMats {
 	echo "Dig"
 	SyncEvents
 	TargetMats
@@ -145,6 +140,7 @@ function Dig {
 function PrintTuningSettings {
 	echo "********** Tuning settings **********"
 	echo "CYCLE_N=$CYCLE_N"
+	echo "TOON_NAME=$TOON_NAME"	
 	echo "CYCLE_DIG_TIME=$CYCLE_DIG_TIME"
 	echo "CYCLE_CP_TIME=$CYCLE_CP_TIME"
 	echo "PROSPECT_INITIAL_TIME=$PROSPECT_INITIAL_TIME"
@@ -152,26 +148,27 @@ function PrintTuningSettings {
 	echo "*************************************"
 }
 
-function CompleteCycle {
+function Dig {
 	PrintTuningSettings
 	SyncEvents
 	FocusClientWindow
 
 	Prospect
 	DefaultEventHndl
-	Dig
+	ExtractMats
 	DefaultEventHndl
-	Dig
+	ExtractMats
 	DefaultEventHndl
 }
 
 if [ $THIS_SCRIPT == $THIS_SHELL ]; then
-	echo "Performing $THIS_SCRIPT command:"
-	echo "$@"
+	echo "Performing $THIS_SCRIPT ($THIS_SHELL) command:"
+	echo "$@"											
 	FocusClientWindow
 	"$@"
 else
-	CompleteCycle
+	echo "$THIS_SCRIPT != $THIS_SHELL" 1>&2
+	Dig
 	exit 0;
 fi;
 

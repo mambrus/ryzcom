@@ -1,19 +1,15 @@
 #!/bin/bash
 
-if [ $# == 3 ]; then
-	if [ $3 != "daring" ]; then
-		exit 1;
-	fi; 
-else
-	echo "Syntax error: dig_all.sh (<Dig count>|<0=clean internal inventory counter>) [<TG Toon name>] ["daring"]"
-fi;
-
-TOON_NAME=$2
+export TOON_NAME=$2
 . ./.env
 
 # *** Internal calibration 
 . rbot_$TOON_NAME
 echo "" > $DLOGFILE;
+
+THIS_SCRIPT="dig_all.sh"
+THIS_SHELL=`echo ${0/#.*\//}` 
+
 
 function NotifyMaster {
 	case $1 in
@@ -62,28 +58,49 @@ function NotifyMaster {
 		}
 	'
 
-#function dig_all {
+function ClearMatsLog {
+	rm -f $MATSLOG
+	sync
+	echo "" > $MATSLOG;
+	echo "*********************************"
+	echo "*** Inventory account cleared ***"
+	echo "*********************************"
+}
+
+function MatsSum {
+	awk "$SUMOF_MATS_AWK" < $MATSLOG
+}
+
+
+function Dig_all {
 	if [ $1 == 0 ]; then
-		rm -f $MATSLOG
-		sync
-		echo "" > $MATSLOG;
-		echo "*********************************"
-		echo "*** Inventory account cleared ***"
-		echo "*********************************"
+		ClearMatsLog
 		exit 0;
 	fi;
 	
-	echo "Digging until bag full or user interaction needed"
+	if [ $# == 3 ]; then
+		if [ $3 != "daring" ]; then
+			echo "Arg #3 ($3) must be \"daring\" if used at all"
+			exit 1;
+		fi; 
+	else
+		echo "Syntax error: dig_all.sh (<Dig count>|<0=clean internal inventory counter>) [<TG Toon name>] ["daring"]" 1>&2
+	fi;
+	
+	echo "Digging until bag full or user interaction needed" 1>&2
 	echo -n "*** Inventory  ****     : "
-	MATSUM=$(awk "$SUMOF_MATS_AWK" < $MATSLOG)
+	if ! [ -a $MATSLOG ]; then
+		echo "" > $MATSLOG;
+	fi;
+	MATSUM=$(MatsSum)
 	echo "$MATSUM"
 
 	
 	for (( loop=0 , rc=0 ; $MATSUM<$1 && rc==0 ; loop++ )) ; do
 		echo -n "*** Digging #$loop ****     : "
-		./dig.sh $2 >> $DLOGFILE
+		./dig.sh Dig >> $DLOGFILE
 		let "rc=$?";
-		MATSUM=$(awk "$SUMOF_MATS_AWK" < $MATSLOG)
+		MATSUM=$(MatsSum)
 		echo "$MATSUM"
 		if [ $rc != 0 ]; then
 			NotifyMaster $rc
@@ -107,9 +124,15 @@ function NotifyMaster {
 		echo "*********************************"
 		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_BAGFULL" >> /dev/null
 	fi;
-	
-	
-#}
+}
 
-#dig_all $1 $2 $3
+if [ $THIS_SCRIPT == $THIS_SHELL ]; then
+	echo "Performing $THIS_SCRIPT ($THIS_SHELL) command:" 
+	echo "$@"												
+	"$@"
+else
+	echo "$THIS_SCRIPT != $THIS_SHELL" 1>&2
+	Dig_all $1 $2 $3
+fi;
+
 
