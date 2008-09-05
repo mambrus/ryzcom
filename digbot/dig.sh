@@ -178,11 +178,11 @@ function Dig {
 		Extract
 		if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD|$E_NOFOCUS"; then
 			if EventOccured "$E_NOFOCUS"; then
-				SyncEvents
 				echo "------> Low on focus <---------";				
+				SyncEvents;
 				let "keep_digging=1";
 				UpDown_key;
-				SleepEvent 3 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
+				SleepEvent `expr $CYCLE_DIG_TIME / 5 + $CYCLE_CP_TIME / 5` "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
 				UpDown_key;
 			else
 				let "keep_digging=0";
