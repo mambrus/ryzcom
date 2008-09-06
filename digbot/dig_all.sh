@@ -18,7 +18,6 @@ function NotifyMaster {
 		echo "**** You have been hurt. RUN! ***"
 		echo "*********************************"
 		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_DMG" >> /dev/null;;
-
 	$RC_PROSPECTGIVUP	) 
 		echo "*********************************"
 		echo "***** Giving up prospecting *****"
@@ -39,6 +38,11 @@ function NotifyMaster {
 		echo "*****  Your pick is broken  *****"
 		echo "*********************************"
 		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_BROKENPICK" >> /dev/null;;
+	$RC_HEAL		) 
+		echo "*********************************"
+		echo "*****  Healed (cmd needed)  *****"
+		echo "*********************************"
+		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_HEAL" >> /dev/null;;		
 	*			) 
 		echo "*********************************"
 		echo "*** Unknown exit reason ($1)  ****"
@@ -100,11 +104,12 @@ function Dig_all {
 		echo -n "*** Digging #$loop ****     : "
 		./dig.sh Dig >> $DLOGFILE
 		let "rc=$?";
-		MATSUM=$(MatsSum)
-		echo "$MATSUM"
 		if [ $rc != 0 ]; then
 			NotifyMaster $rc
 		fi;
+		MATSUM=$(MatsSum)
+		echo "$MATSUM"
+		./bot_primitives.sh Turn right 180 >> $DLOGFILE
 		if [ $# -ge 3 ]; then
 			if [ $3 == "daring" ]; then
 				if [ $rc == $RC_DMG ]; then
@@ -116,6 +121,7 @@ function Dig_all {
 				fi;
 			fi;
 		fi;
+		./bot_primitives.sh Turn right 180 >> $DLOGFILE
 	done
 	
 	if [ $rc == 0 ]; then

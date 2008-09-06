@@ -97,7 +97,7 @@ function PrintStr {
 
 function PrintLine {
 	for aWord in $1; do
-#		PrintStr $aWord;
+		PrintStr $aWord;
 		echo $aWord;
 	done	
 }

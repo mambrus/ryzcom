@@ -24,6 +24,7 @@ fi;
 
 # *** Create an event-system for this shell 
 . ./event.sh
+E_EXIT_REASONS="$E_DMG|$E_DEAD|$E_BROKENPICK|$E_HEAL"
 
 
 function OneCycle {
@@ -67,8 +68,9 @@ function Prospect {
 			exit $RC_PROSPECTGIVUP;
 		fi
 		
-		if SleepEvent $PROSPECT_INITIAL_TIME "$E_MATS|$E_BROKENPICK|$E_DMG|$E_DEAD"; then
-			#echo "      *** Prospecting event detected"
+		if SleepEvent $PROSPECT_INITIAL_TIME "$E_MATS|$E_EXIT_REASONS"; then
+			echo "      *** Prospecting event detected ##"
+			DefaultEventHndl
 			UpDown_key;
 			XteSleep $PROSPECT_REST_TIME;
 			UpDown_key;
@@ -76,8 +78,7 @@ function Prospect {
 				echo "You've found mats!!!";
 				#return 0;
 				let "ppf = 1";
-			fi;
-			DefaultEventHndl
+			fi;			
 		else
 			#cat $ESCANFILE;
 			#exit 100;
@@ -101,34 +102,21 @@ function ExtractMats {
 	echo "Dig"
 	SyncEvents
 	TargetMats
-	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
+	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_EXIT_REASONS"
 	DefaultEventHndl
 	echo "  Cycle last"
-	for (( keep_digging=1 , retries=0 ; (keep_digging==1) && (retries<5) ; retries++ )) do
-		#&& retries<5
-		Extract
-		if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD|$E_NOFOCUS"; then
-			if EventOccured "$E_NOFOCUS"; then
-				echo "------> Low on focus <---------";				
-				SyncEvents;
-				let "keep_digging=1";
+	Extract
+	if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_NOFOCUS|$E_EXIT_REASONS"; then
+		DefaultEventHndl
+		if EventOccured "$E_NOFOCUS"; then
+			echo "------> Low on focus <---------";							
 				UpDown_key;
-				SleepEvent `expr $CYCLE_DIG_TIME / 5 + $CYCLE_CP_TIME / 5` "$E_DONEDIG|$E_BADDIG|$E_DMG|$E_DEAD"
-				UpDown_key;
-			else
-				let "keep_digging=0";
-			fi;
-			
-			echo "Sleep aborted due to event";
-		else
-			echo "-- Timeout --";
-			let "keep_digging=0";
 		fi;
-	done;
-	Paus
+	fi;
 	echo "  Pickup"
 	PickUp
-	if SleepEvent 10 "$E_ITEMTOBAG"; then
+	if SleepEvent 10 "$E_ITEMTOBAG|$E_EXIT_REASONS"; then
+		DefaultEventHndl
 		echo "X Mats picked up";
 		cat $GREPDUMP | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
 	else

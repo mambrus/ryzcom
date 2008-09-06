@@ -14,6 +14,8 @@ E_DMG='INF.*\[&DMG&'
 E_DEAD='INF.*\[&SYS&You have been killed'
 E_ITEMTOBAG='INF.*\[&ITM&You obtain'
 E_HEAL='INF.*\[&SPL&.* invokes a beneficial spell'
+E_TEAMOFFER='DynString.*\[.* offers you to join .* team.\]'
+
 
 # * 
 # * Synchronizing the eventgenerator system
@@ -86,5 +88,10 @@ function DefaultEventHndl {
 				echo "Event found: $E_DEAD";
 				exit $RC_DEAD;
 			fi;
+			if EventOccured "$E_HEAL"; then
+				echo "Event found: $E_HEAL";
+				exit $RC_HEAL;
+			fi;
+			
 }
 
