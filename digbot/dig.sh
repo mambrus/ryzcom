@@ -119,12 +119,14 @@ function ExtractMats {
 	fi;
 	echo "  Pickup"
 	PickUp
-	if SleepEvent $EVNT_HNDL 10 "$E_ITEMTOBAG|$E_EXIT_REASONS"; then
-		DefaultEventHndl $EVNT_HNDL
+	if SleepEvent $EVNT_HNDL 10 "$E_ITEMTOBAG|$E_EXIT_REASONS"; then		
 		echo "---X--- Mats picked up";
-		echo "$GREPDUMP.$EVNT_HNDL.grp"
+		#echo "$GREPDUMP.$EVNT_HNDL.grp"
 		cat $GREPDUMP.$EVNT_HNDL.grp | sed -e 's/INF.*&//' | sed -e 's/You obtain //'
 		cat $GREPDUMP.$EVNT_HNDL.grp | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
+		
+		#Having the line below las is a special case. Reason is to perserve the last grepdump.
+		DefaultEventHndl $EVNT_HNDL
 	else
 		echo "@@@@@@@@@@@@@@@ Pickup Timeout -> Bag must be full @@@@@@";
 		exit $RC_BAGFULL;

@@ -3,7 +3,7 @@
 
 # Lists all users ever have said anything in any of your available chats
 function lusers {
-	grep 'SM.*(.*)' $RYZOMDIR/client.log | sed -e 's/^.*\[//' | sed -e 's/\].*$//' | grep -v '&' | grep -v '%' | sort 
+	grep 'SM.*(.*)' $RYZOMDIR/client.log | sed -e 's/^.*\[//' | sed -e 's/\].*$//' | grep -v '&' | grep -v '%' 
 }
 
 # Lists all unique users 
