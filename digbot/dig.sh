@@ -6,6 +6,7 @@
 
 THIS_SCRIPT="dig.sh"
 THIS_SHELL=`echo ${0/#.*\//}`
+EVNT_HNDL=$THIS_SCRIPT.E
 
 # *** Internal calibration 
 if [ $THIS_SCRIPT == $THIS_SHELL ]; then
@@ -28,18 +29,18 @@ E_EXIT_REASONS="$E_DMG|$E_DEAD|$E_BROKENPICK|$E_HEAL"
 
 
 function OneCycle {
-	#SyncEvents
+	#SyncEvents $EVNT_HNDL
 	Extract
-	SleepEvent $CYCLE_DIG_TIME "$1"
+	SleepEvent $EVNT_HNDL $CYCLE_DIG_TIME "$1"
 	Careplan
-	SleepEvent $CYCLE_CP_TIME "$1"
+	SleepEvent $EVNT_HNDL $CYCLE_CP_TIME "$1"
 }
 
 function DigCycles {
 	for (( loop=0 ; loop<$1 ; loop++ )) ; do
 		echo "  Cycle $loop"
 		OneCycle "$2";
-		DefaultEventHndl
+		DefaultEventHndl $EVNT_HNDL
 	done
 }
 
@@ -68,13 +69,13 @@ function Prospect {
 			exit $RC_PROSPECTGIVUP;
 		fi
 		
-		if SleepEvent $PROSPECT_INITIAL_TIME "$E_MATS|$E_EXIT_REASONS"; then
+		if SleepEvent $EVNT_HNDL $PROSPECT_INITIAL_TIME "$E_MATS|$E_EXIT_REASONS"; then
 			echo "      *** Prospecting event detected ##"
-			DefaultEventHndl
+			DefaultEventHndl $EVNT_HNDL
 			UpDown_key;
 			XteSleep $PROSPECT_REST_TIME;
 			UpDown_key;
-			if EventOccured "$E_MATS"; then
+			if EventOccured $EVNT_HNDL "$E_MATS"; then
 				echo "You've found mats!!!";
 				#return 0;
 				let "ppf = 1";
@@ -100,25 +101,30 @@ function Prospect {
 
 function ExtractMats {
 	echo "Dig"
-	SyncEvents
+	SyncEvents $EVNT_HNDL
 	TargetMats
 	DigCycles $CYCLE_N "$E_DONEDIG|$E_BADDIG|$E_EXIT_REASONS"
-	DefaultEventHndl
+	DefaultEventHndl $EVNT_HNDL
 	echo "  Cycle last"
 	Extract
-	if SleepEvent 40 "$E_DONEDIG|$E_BADDIG|$E_NOFOCUS|$E_EXIT_REASONS"; then
-		DefaultEventHndl
-		if EventOccured "$E_NOFOCUS"; then
+	if SleepEvent $EVNT_HNDL 40 "$E_DONEDIG|$E_BADDIG|$E_NOFOCUS|$E_EXIT_REASONS"; then
+		DefaultEventHndl $EVNT_HNDL
+		if EventOccured $EVNT_HNDL "$E_NOFOCUS"; then
 			echo "------> Low on focus <---------";							
-				UpDown_key;
+			UpDown_key;
+			SleepEvent $EVNT_HNDL 40 "$E_DONEDIG|$E_BADDIG|$E_EXIT_REASONS";
+			DefaultEventHndl $EVNT_HNDL
+			UpDown_key;
 		fi;
 	fi;
 	echo "  Pickup"
 	PickUp
-	if SleepEvent 10 "$E_ITEMTOBAG|$E_EXIT_REASONS"; then
-		DefaultEventHndl
-		echo "X Mats picked up";
-		cat $GREPDUMP | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
+	if SleepEvent $EVNT_HNDL 10 "$E_ITEMTOBAG|$E_EXIT_REASONS"; then
+		DefaultEventHndl $EVNT_HNDL
+		echo "---X--- Mats picked up";
+		echo "$GREPDUMP.$EVNT_HNDL.grp"
+		cat $GREPDUMP.$EVNT_HNDL.grp | sed -e 's/INF.*&//' | sed -e 's/You obtain //'
+		cat $GREPDUMP.$EVNT_HNDL.grp | sed -e 's/INF.*&//' | sed -e 's/You obtain //' >> $MATSLOG
 	else
 		echo "@@@@@@@@@@@@@@@ Pickup Timeout -> Bag must be full @@@@@@";
 		exit $RC_BAGFULL;
@@ -138,15 +144,15 @@ function PrintTuningSettings {
 
 function Dig {
 	PrintTuningSettings
-	SyncEvents
+	SyncEvents $EVNT_HNDL
 	FocusClientWindow
 
 	Prospect
-	DefaultEventHndl
+	DefaultEventHndl $EVNT_HNDL
 	ExtractMats
-	DefaultEventHndl
+	DefaultEventHndl $EVNT_HNDL
 	ExtractMats
-	DefaultEventHndl
+	DefaultEventHndl $EVNT_HNDL
 }
 
 if [ $THIS_SCRIPT == $THIS_SHELL ]; then
@@ -159,5 +165,4 @@ else
 	Dig
 	exit 0;
 fi;
-
 

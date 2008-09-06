@@ -12,6 +12,7 @@ THIS_SHELL=`echo ${0/#.*\//}`
 
 
 function NotifyMaster {
+	echo
 	case $1 in
 	$RC_DMG	) 
 		echo "*********************************"
@@ -121,7 +122,6 @@ function Dig_all {
 				fi;
 			fi;
 		fi;
-		./bot_primitives.sh Turn right 180 >> $DLOGFILE
 	done
 	
 	if [ $rc == 0 ]; then

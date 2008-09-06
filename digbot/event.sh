@@ -18,40 +18,41 @@ E_TEAMOFFER='DynString.*\[.* offers you to join .* team.\]'
 
 
 # * 
-# * Synchronizing the eventgenerator system
+# * Synchronizing events for the eventgenerator system ID passed as arg #1
 # * 
 function SyncEvents {
 	echo "      SyncingEvents"
-	cp $RYZOMDIR/client.log client.log.sync	
+	cp $RYZOMDIR/client.log logs/$1.sync	
+	sync
 }
 
 # * 
-# * Checks is an event occured since last SyncEvents
+# * Checks is the event in $2 occured since last SyncEvents related to eventsystem ID in $1
 # *  
 function EventOccured {
-	diff $RYZOMDIR/client.log client.log.sync | sed -e 's/^< //' > $ESCANFILE
-	#echo "Scanning for: $1"
-	grep -E "$1" < $ESCANFILE > $GREPDUMP
+	diff $RYZOMDIR/client.log logs/$1.sync | sed -e 's/^< //' > $ESCANFILE.$1.scan
+	#echo "Scanning for: $2 in eventsystem $1"
+	grep -E "$2" < $ESCANFILE.$1.scan > $GREPDUMP.$1.grp
 	if [ $? == 0  ]; then
-		#cat $ESCANFILE
+		#cat $ESCANFILE.$1.scan
 		return 0;
 	else
-		#cat $ESCANFILE
+		#cat $ESCANFILE.$1.scan
 		return 1;
 	fi;
 }
 
 # * 
-# * Sleeps $1 seconds or until the $2 event occurs.
+# * Sleeps $2 seconds or until the $3 event occurs. Relates to eventsystem ID in $1
 # * 
 function SleepEvent {
 	indrag="      "
-	echo "$indrag Sleeping either for [$1]s or when [$2] happens"
-	
+	echo "$indrag Sleeping either for [$2]s or when [$3] happens in event scope [$1]"
+
 	echo -n "$indrag "
-	for (( i=0 ; i<($1*10) ; i++ )) do
+	for (( i=0 ; i<($2*10) ; i++ )) do
 		XteUSleep 50000;
-		if EventOccured "$2"; then
+		if EventOccured $1 "$3"; then
 			return 0;
 		fi;		
 		let "j=$i+1";
@@ -67,28 +68,28 @@ function SleepEvent {
 		fi;
 	done
 	echo
-
+	
 	return 1;
 }
 
 # * 
-# * Emergency or common handling of certain events
+# * Emergency or common handling of certain events. Relates to eventsystem ID in $1
 # * 
 function DefaultEventHndl {
-			if EventOccured "$E_DMG"; then
+			if EventOccured $1 "$E_DMG"; then
 				EvadeToxicCloud
 				echo "Event found: $E_DMG";
 				exit $RC_DMG;
 			fi;
-			if EventOccured "$E_BROKENPICK"; then
+			if EventOccured $1 "$E_BROKENPICK"; then
 				echo "Event found: $E_BROKENPICK";
 				exit $RC_BROKENPICK;
 			fi;
-			if EventOccured "$E_DEAD"; then
+			if EventOccured $1 "$E_DEAD"; then
 				echo "Event found: $E_DEAD";
 				exit $RC_DEAD;
 			fi;
-			if EventOccured "$E_HEAL"; then
+			if EventOccured $1 "$E_HEAL"; then
 				echo "Event found: $E_HEAL";
 				exit $RC_HEAL;
 			fi;
