@@ -1,4 +1,7 @@
 #!/bin/bash
+# Topmost shell. Enables quitting client and shutting down system. Good for
+# leaving bot at bed time and making sure toons is not there annoying ppl.
+
 . ./.env
 . ./dig_all.sh $1 $2 $3 $4 | tee $DBOTFILE
 

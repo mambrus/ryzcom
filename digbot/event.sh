@@ -15,8 +15,10 @@ E_DEAD='INF.*\[&SYS&You have been killed'
 E_ITEMTOBAG='INF.*\[&ITM&You obtain'
 E_XP='INF.*\[&XP&You gain .* experience'
 E_HEAL='INF.*\[&SPL&.* invokes a beneficial spell'
-E_TEAMOFFER='DynString.*\[.* offers you to join .* team.\]'
+E_TEAMOFFER='INF.*\[.* offers you to join .* team.\]'
 E_EMOTE='INF.*\[&EMT&.*\]'
+E_DUEL='INF.*\[.* invites you to a duel. Do you accept.*\]'
+E_EXCHANGE='INF.*\[.* invites you to exchange with .*\]'
 
 
 # * 
@@ -115,4 +117,3 @@ function DefaultEventHndl {
 				exit $RC_HEAL;
 			fi;
 }
-

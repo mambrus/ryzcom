@@ -124,10 +124,29 @@ function Dig_all {
 		else
 			echo "$MATSUM"
 		fi;
+
 		if EventOccured $EVNT_HNDL "$E_EMOTE"; then
 			echo "****************************************"
 			echo "Emotes recieved:"			
 			PrintEvent $EVNT_HNDL | sed -e 's/.*\[&EMT&/  /' | sed -e 's/\].*//' | grep -v "%s"
+			echo "****************************************"
+		fi;
+		if EventOccured $EVNT_HNDL "$E_DUEL"; then
+			echo "****************************************"
+			echo "A request for DUEL recieved:"			
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
+			echo "****************************************"
+		fi;
+		if EventOccured $EVNT_HNDL "$E_EXCHANGE"; then
+			echo "****************************************"
+			echo "A request for EXCHANGE recieved:"			
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
+			echo "****************************************"
+		fi;
+		if EventOccured $EVNT_HNDL "$E_TEAMOFFER"; then
+			echo "****************************************"
+			echo "A request for TEAM recieved:"			
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
 			echo "****************************************"
 		fi;
 		
