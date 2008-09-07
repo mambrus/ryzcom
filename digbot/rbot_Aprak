@@ -10,7 +10,7 @@ export CYCLE_N=2
 # * The following two define the dig/cp ration, but also how long your dig takes.
 # * A good ratio should be about 4:1 and you should have time to complete CYCLE_N
 # * If sum of the times is related to "Extraction Time Bonus" stanza among others.
-export CYCLE_DIG_TIME=22
+export CYCLE_DIG_TIME=24
 export CYCLE_CP_TIME=6
 
 # ** Prospect related

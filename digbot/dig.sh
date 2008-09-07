@@ -107,12 +107,12 @@ function ExtractMats {
 	DefaultEventHndl $EVNT_HNDL
 	echo "  Cycle last"
 	Extract
-	if SleepEvent $EVNT_HNDL 40 "$E_DONEDIG|$E_BADDIG|$E_NOFOCUS|$E_EXIT_REASONS"; then
+	if SleepEvent $EVNT_HNDL 50 "$E_DONEDIG|$E_BADDIG|$E_NOFOCUS|$E_EXIT_REASONS"; then
 		DefaultEventHndl $EVNT_HNDL
 		if EventOccured $EVNT_HNDL "$E_NOFOCUS"; then
 			echo "------> Low on focus <---------";							
 			UpDown_key;
-			SleepEvent $EVNT_HNDL 40 "$E_DONEDIG|$E_BADDIG|$E_EXIT_REASONS";
+			SleepEvent $EVNT_HNDL 50 "$E_DONEDIG|$E_BADDIG|$E_EXIT_REASONS";
 			DefaultEventHndl $EVNT_HNDL
 			UpDown_key;
 		fi;
