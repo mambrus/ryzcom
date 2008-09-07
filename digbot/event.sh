@@ -13,8 +13,10 @@ E_BROKENPICK='INF.*\[&CHK&You don.* forage'
 E_DMG='INF.*\[&DMG&'
 E_DEAD='INF.*\[&SYS&You have been killed'
 E_ITEMTOBAG='INF.*\[&ITM&You obtain'
+E_XP='INF.*\[&XP&You gain .* experience'
 E_HEAL='INF.*\[&SPL&.* invokes a beneficial spell'
 E_TEAMOFFER='DynString.*\[.* offers you to join .* team.\]'
+E_EMOTE='INF.*\[&EMT&.*\]'
 
 
 # * 
@@ -43,11 +45,30 @@ function EventOccured {
 }
 
 # * 
+# * Output results of the last EventOccured query
+# *  
+function PrintEvent {
+	cat $GREPDUMP.$1.grp
+}
+
+# * 
+# * Output the definitions used as event triggers in $1. $2 is optionally used as indent
+# *  
+function PrintEventTriggers {
+	echo -n "$2 "
+	echo -e ${1//'|'/"\n$2 "}
+}
+
+
+
+# * 
 # * Sleeps $2 seconds or until the $3 event occurs. Relates to eventsystem ID in $1
 # * 
 function SleepEvent {
 	indrag="      "
-	echo "$indrag Sleeping either for [$2]s or when [$3] happens in event scope [$1]"
+	echo "$indrag Waiting for events in scope [$1] with timeout [$2]:"
+	PrintEventTriggers "$3" "------->"
+#	PrintEventTriggers "$3" "        "
 
 	echo -n "$indrag "
 	for (( i=0 ; i<($2*10) ; i++ )) do
@@ -93,6 +114,5 @@ function DefaultEventHndl {
 				echo "Event found: $E_HEAL";
 				exit $RC_HEAL;
 			fi;
-			
 }
 

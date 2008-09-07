@@ -9,7 +9,10 @@ echo "" > $DLOGFILE;
 
 THIS_SCRIPT="dig_all.sh"
 THIS_SHELL=`echo ${0/#.*\//}` 
+EVNT_HNDL=$THIS_SCRIPT.E
 
+# *** Create an event-system for this shell 
+. ./event.sh
 
 function NotifyMaster {
 	echo
@@ -102,6 +105,7 @@ function Dig_all {
 
 	
 	for (( loop=0 , rc=0 ; $MATSUM<$1 && rc==0 ; loop++ )) ; do
+		SyncEvents $EVNT_HNDL >> /dev/null
 		echo -n "*** Digging #$loop ****     : "
 		./dig.sh Dig >> $DLOGFILE
 		let "rc=$?";
@@ -109,7 +113,24 @@ function Dig_all {
 			NotifyMaster $rc
 		fi;
 		MATSUM=$(MatsSum)
-		echo "$MATSUM"
+		
+		if EventOccured $EVNT_HNDL "$E_XP"; then
+			echo -n "$MATSUM : XP="
+			XPS=$(PrintEvent $EVNT_HNDL | cut -d" " -f17)
+			for aXP in $XPS; do
+				echo -n "$aXP, "
+			done
+			echo
+		else
+			echo "$MATSUM"
+		fi;
+		if EventOccured $EVNT_HNDL "$E_EMOTE"; then
+			echo "****************************************"
+			echo "Emotes recieved:"			
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[&EMT&/  /' | sed -e 's/\].*//' | grep -v "%s"
+			echo "****************************************"
+		fi;
+		
 		./bot_primitives.sh Turn right 180 >> $DLOGFILE
 		if [ $# -ge 3 ]; then
 			if [ $3 == "daring" ]; then
