@@ -84,34 +84,42 @@ function PrintChar {
 }
 
 function PrintSpace {
-	echo 'str ' | xte
+	echo 'key  ' | xte
 	uPaus
 }
 
-function PrintStr {
+function PrintStrCharwise {
 	theStr=`echo $1 | sed -e 's/./& /g'`
 	for aChar in $theStr; do
 		PrintChar $aChar;
 	done	
 }
 
+function PrintStr {
+	#Chunks=${1//...../& /}
+	Chunks=`echo $1 | sed -e 's/..../& /g'`
+	for aChunk in $Chunks; do
+		xte "str $aChunk" 'usleep 100000'
+	done
+}
+
+
 function PrintLine {
 	for aWord in $1; do
-		PrintStr $aWord;
-		echo $aWord;
-	done	
+		PrintStr $aWord 
+		xte 'str  ' 'usleep 100000'
+	done
 }
 
 function xPrintLine {
-	echo "key Return" | xte
-	Paus
-	for aWord in $1; do
-		PrintStr $aWord;
-		PrintSpace;
-#		echo $aWord;
-	done	
-	echo "key Return" | xte
-	Paus
+	xte 'key Return' 'usleep 100000'	
+	PrintLine "$1"
+	xte 'key Return' 'usleep 100000'	
+}
+
+function pl {
+	xPrintLine "$1"
+	#xte 'key Return' 'sleep 1' "str $1" 'sleep 10' 'key Return' 'sleep 1'
 }
 
 function ccTargetMats {
