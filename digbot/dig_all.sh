@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./bot_primitives.sh
+
 export TOON_NAME=$2
 . ./.env
 
@@ -13,6 +15,8 @@ EVNT_HNDL=$THIS_SCRIPT.E
 
 # *** Create an event-system for this shell 
 . ./event.sh
+
+EVNT_FILE="logs/BiE_$THIS_SCRIPT_$TOON_NAME"
 
 function NotifyMaster {
 	echo
@@ -46,7 +50,8 @@ function NotifyMaster {
 		echo "*********************************"
 		echo "*****  Healed (cmd needed)  *****"
 		echo "*********************************"
-		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_HEAL" >> /dev/null;;		
+		;;
+#		$PLAYER  "$PLAYER_ARGS" "$PDIR/$PFILE_HEAL" >> /dev/null;;		
 	*			) 
 		echo "*********************************"
 		echo "*** Unknown exit reason ($1)  ****"
@@ -75,10 +80,57 @@ function ClearMatsLog {
 	echo "*********************************"
 }
 
+function HndlEmote {
+	echo "$@"
+}
+
+function HndlTeam {
+	echo "$@"
+}
+
+function HndlExchange {
+	echo "$@"
+}
+
+function HndlExchange {
+	echo "$@"
+}
+
+function HndlHeal {
+	echo "$@"
+	if [ $1 == "&SPL&Aaries" ]; then
+		RunForward 2
+		echo -n "-----> Following "
+		pl "/tar Aaries"
+		sleep 1
+		echo "Aaries <-----"
+		pl "/follow"
+		exit 0
+	fi;
+}
+
+function HndlMany {
+	read -a aEvnt
+	if [ $1 == "emote" ]; then
+		HndlEmote ${aEvnt[@]} 
+	elif [ $1 == "team" ]; then
+		HndlTeam ${aEvnt[@]}
+	elif [ $1 == "exchange" ]; then
+		HndlExchange ${aEvnt[@]}
+	elif [ $1 == "duel" ]; then
+		HndlDuel ${aEvnt[@]}
+	elif [ $1 == "heal" ]; then
+		HndlHeal ${aEvnt[@]}
+	fi;		
+}
+
+function Hndlr {
+	HndlMany $1 < $2
+}
+
 function MatsSum {
 	awk "$SUMOF_MATS_AWK" < $MATSLOG
 }
-
 
 function Dig_all {
 	if [ $1 == 0 ]; then
@@ -102,7 +154,6 @@ function Dig_all {
 	fi;
 	MATSUM=$(MatsSum)
 	echo "$MATSUM"
-
 	
 	for (( loop=0 , rc=0 ; $MATSUM<$1 && rc==0 ; loop++ )) ; do
 		SyncEvents $EVNT_HNDL >> /dev/null
@@ -128,27 +179,39 @@ function Dig_all {
 		if EventOccured $EVNT_HNDL "$E_EMOTE"; then
 			echo "****************************************"
 			echo "Emotes recieved:"			
-			PrintEvent $EVNT_HNDL | sed -e 's/.*\[&EMT&/  /' | sed -e 's/\].*//' | grep -v "%s"
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[&EMT&/  /' | sed -e 's/\].*//' | grep -v "%s" > $EVNT_FILE 
+			Hndlr "emote" $EVNT_FILE
 			echo "****************************************"
 		fi;
 		if EventOccured $EVNT_HNDL "$E_DUEL"; then
 			echo "****************************************"
 			echo "A request for DUEL recieved:"			
-			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s" > $EVNT_FILE
+			Hndlr "duel" $EVNT_FILE
 			echo "****************************************"
 		fi;
 		if EventOccured $EVNT_HNDL "$E_EXCHANGE"; then
 			echo "****************************************"
 			echo "A request for EXCHANGE recieved:"			
-			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s" > $EVNT_FILE
+			Hndlr "exchange" $EVNT_FILE
 			echo "****************************************"
 		fi;
 		if EventOccured $EVNT_HNDL "$E_TEAMOFFER"; then
 			echo "****************************************"
 			echo "A request for TEAM recieved:"			
-			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s"
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s" > $EVNT_FILE
+			Hndlr "team" $EVNT_FILE
 			echo "****************************************"
 		fi;
+		if EventOccured $EVNT_HNDL "$E_HEAL"; then
+			echo "****************************************"
+			echo "You have been healed:"			
+			PrintEvent $EVNT_HNDL | sed -e 's/.*\[/  /' | sed -e 's/\].*//' | grep -v "%s" > $EVNT_FILE
+			Hndlr "heal" $EVNT_FILE
+			echo "****************************************"
+		fi;
+		
 		
 		./bot_primitives.sh Turn right 180 >> $DLOGFILE
 		if [ $# -ge 3 ]; then
