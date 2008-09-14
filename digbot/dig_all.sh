@@ -86,6 +86,11 @@ function HndlEmote {
 
 function HndlTeam {
 	echo "$@"
+	if [ $1 == $PUPPETEER ]; then		
+		echo -n "-----> Teaming with "
+		pl "/invite $PUPPETEER"
+		echo "$PUPPETEER <-----"
+	fi;	
 }
 
 function HndlExchange {
@@ -98,12 +103,12 @@ function HndlExchange {
 
 function HndlHeal {
 	echo "$@"
-	if [ $1 == "&SPL&Aaries" ]; then
+	if [ $1 == "&SPL&$PUPPETEER" ]; then
 		RunForward 2
 		echo -n "-----> Following "
-		pl "/tar Aaries"
+		pl "/tar $PUPPETEER"
 		sleep 1
-		echo "Aaries <-----"
+		echo "$PUPPETEER <-----"
 		pl "/follow"
 		exit 0
 	fi;
@@ -139,10 +144,9 @@ function Dig_all {
 	fi;
 	
 	if [ $# == 3 ]; then
-		if [ $3 != "daring" ]; then
-			echo "Arg #3 ($3) must be \"daring\" if used at all"
-			exit 1;
-		fi; 
+#		if [ -f $3 ]; then
+#		fi;
+		SelectMenu $3		
 	else
 		echo "Syntax error: dig_all.sh (<Dig count>|<0=clean internal inventory counter>) [<TG Toon name>] ["daring"]" 1>&2
 	fi;

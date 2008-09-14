@@ -26,3 +26,5 @@ export PROSPECT_INITIAL_TIME=17
 # * mats and in worst case even blow-up's 
 export PROSPECT_REST_TIME=1
 
+# * Who is allowed to control you as a puppeteer from withing game 
+export PUPPETEER="Aprak"

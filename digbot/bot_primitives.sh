@@ -9,10 +9,66 @@ TIME_FULL_TURN=3000000
 THIS_SCRIPT="bot_primitives.sh"
 THIS_SHELL=`echo ${0/#.*\//}` 
 
+function geometry() {
+	#xwininfo -display :0.0 -name Ryzom | grep geometry | \
+	xwininfo -name Ryzom | grep geometry | \
+		sed -e 's/.* //' | \
+		sed -e 's/[x+]/ /g'
+}
+
+# Helper to keyX function
+function kexp() {
+	if [ $# == 2 ]; then
+		#echo "'keydown $1' 'key $2' 'keyup $1'"
+		echo "keydown $1" 
+		echo "key $2" 
+		echo "keyup $1"
+	else
+		echo "key $1"
+	fi
+}
+
+# Expands a combined key to a valid xte key sequence
+function keyX () {
+	kexp ${1/+/ }
+}
+
 function FocusClientWindow {
 	echo "mousemove 100 100" | xte
 	echo "mouseclick 1" | xte
 	Paus
+}
+
+function SelectMenu_WOOD {
+	keyX $DIGMENU_WOOD 
+}
+
+function SelectMenu_RESIN {
+	keyX $DIGMENU_RESIN 
+}
+
+function SelectMenu_SAP {
+	keyX $DIGMENU_SAP 
+}
+
+function SelectMenu_OIL {
+	keyX $DIGMENU_OIL 
+}
+
+function SelectMenu {
+	FocusClientWindow
+	SelectMenu_$1 | xte
+
+	#ARGA=($ARGS)
+	#for AW in $ARGS; do
+	#	echo $AW
+	#done
+	#xte ${ARGS[1]} ${ARGS[2]} ${ARGS[3]}
+	#echo $ARGS
+	#echo $ARGS
+	#echo ${ARGA[1]} ${ARGA[2]} ${ARGA[3]}
+
+	Paus 
 }
 
 function XteSleep {
@@ -205,4 +261,3 @@ if [ $THIS_SCRIPT == $THIS_SHELL ]; then
 	FocusClientWindow
 	"$@"
 fi;
-
